@@ -23,6 +23,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.BehaviourTrees
             this.children = new List<Task>()
             {
                 new Sequence(new List<Task>() {new MoveToInterruptible(orc, patrolPoint1, _range, player), new MoveToInterruptible(orc, patrolPoint2, _range, player)}),
+                //new Shout(orc, player); (sequence between shout and pursue?)
                 new Pursue(orc, player, _range),
             };
         }
