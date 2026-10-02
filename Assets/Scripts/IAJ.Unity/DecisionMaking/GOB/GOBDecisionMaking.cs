@@ -37,7 +37,8 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.GOB
             foreach (var goal in goals)
             {
                  // Calculate the new value after the action
-                float changeValue = action.GetGoalChange(goal) + duration * goal.ChangeRate;
+                 //+ duration * goal.ChangeRate retirada porque o be quick já é calculado noutro lado
+                float changeValue = action.GetGoalChange(goal);
                 
                 // The change rate is how much the goals changes per time
                 var newValue = goal.NormalizeGoalValue(goal.InsistenceValue + changeValue, goal.Min, goal.Max);
@@ -51,14 +52,34 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.GOB
         public Action ChooseAction(AutonomousCharacter character)
         {
             // Find the action leading to the lowest discontentment
-            InProgress = true;
             Action bestAction = null;
-            var bestValue = float.PositiveInfinity;
             secondBestAction = null;
             thirdBestAction = null;
             ActionDiscontentment.Clear();
 
-            //ToDo : Implement the logic to choose the best action based on discontentment
+            foreach (var action in actions)
+            {
+                if (action.CanExecute())
+                {
+                    var discontentmentValue = CalculateDiscontentment(action, goals, character);
+                    ActionDiscontentment[action] = discontentmentValue;
+                    // The values are read from ActionDiscontentment, so only the actions need to be shifted down
+                    if (bestAction == null || discontentmentValue < ActionDiscontentment[bestAction])
+                    {
+                        thirdBestAction = secondBestAction;
+                        secondBestAction = bestAction;
+                        bestAction = action;
+                    } else if (secondBestAction == null || discontentmentValue < ActionDiscontentment[secondBestAction])
+                    {
+                        thirdBestAction = secondBestAction;
+                        secondBestAction = action;
+                    } else if (thirdBestAction == null || discontentmentValue < ActionDiscontentment[thirdBestAction])
+                    {
+                        thirdBestAction = action;
+                    }
+
+                }
+            } 
 
             InProgress = false;
             return bestAction;
