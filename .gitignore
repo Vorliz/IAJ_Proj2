@@ -1,3 +1,6 @@
 Temp/*
 Library/*
 Logs/*
+UserSettings/*
+*.csproj
+ProjectSettings/ProjectAuditorSettings.asset
