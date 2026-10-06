@@ -1,0 +1,62 @@
+Lecture 6 Guide - GOB
+
+3. a)
+
+First we tried all goals with 0 weight, and because each goal contributes Weight * x^2 to the discontentment, we ended up
+with every action scoring exactly 0, all tied.
+
+In the case of a tie, ChooseAction picks the first executable action in the list. Because the Skeleton loop comes first in AutonomousCharacter,
+the character chooses attacking skeletons as his three best actions and ends up dying while fighting the third skeleton.
+
+Then we tried each goal with a weight of 1 to see the differences in GOB.
+
+Survive Goal Weight 1:
+
+With this preset, Sword Attacks always have a positive discontentment because the character takes damage from
+the monster when attacking it. Since we want to keep MaxHP - HP = 0, the character chooses other actions with 0 discontentment,
+like PickUpChest, GetManaPotion, DivineSmite, LevelUp and GetHealthPotion, which are all tied.
+Sword Attacks are the only actions that make things worse, so they are never chosen.
+Everything else ties at 0 when the character has MaxHP, so the list order decides again: chests come before potions in the list.
+When he gets hurt (enemies chase him), the health potion becomes strictly the best.
+
+The problems with this approach: the character never gains XP, so he never levels up and never increases his MaxHP.
+Also, because BeQuick has weight 0, he doesn't care about distance and goes for the first chest on the list, even if it's far away and the path is filled with enemies.
+
+
+Gain Level Goal Weight 1:
+Here the character also behaves as predicted.
+To maximize his Level, he always chooses to attack the enemies that give the most XP.
+Because the Dragon's and the Orcs' discontentment tie at 0, again he chooses whatever comes first in the list: the Orcs.
+
+The problem is that he chooses to only fight enemies, starting with the Orcs, and so he always dies while fighting the second one.
+
+Be Quick Goal Weight 1:
+The character also behaves as predicted. He chooses the action that takes the least time to execute,
+so he always goes to the closest objective: picking a potion, attacking a skeleton, picking a chest...
+He ends up dying because his actions are "random". If fighting the Dragon was the closest thing to do, he would go fight it immediately.
+
+Get Rich Goal Weight 1:
+Also as predicted, the character goes for the chests independently of the distance he needs to walk or
+the number of enemies in his path. If he needs to cross the whole map, he ends up doing it.
+
+
+Using sleeping monsters and Survival Goal Weight 1, Be Quick Goal 0.5 and Get Rich Weight 1. The character is able to win by prioritizing to pick up chests and staying alive.
+So he goes to the closest chest and one by one picks them until he wins.
+
+With behaviour tree monsters and the same weights the character manages to pick up chests while fighting eventual Orcs that run into him and avoiding skeletons.
+He picks up HealthPotions after fighting Orcs and eventually reached the last chest protected by the dragon where he ends up dying and loosing.
+GetGoalChange method, describes the actions and their consequences in the world state. 
+so we decided to improve it in four ways.
+Measuring XP in levels, not in raw points. The gain level goal is counted in levels.
+Killing a skeleton (3 XP) at level 1 now counts as 0.3 of a level, Level Up counts as exactly 1, and the numbers are finally comparable. As a bonus, this removed the odd behaviour where killing a stronger monster was penalised.
+2. Knowing that an attack can kill the hero.
+Previously the character thought that dying was just "a bit less health". Now, before choosing a Sword Attack, the action checks whether the damage he would take is enough to bring his HP to zero. If it is, it reports the worst possible result for the Survive goal, so the character avoids suicidal fights unless something else is far more important.
+
+3. Taking the shield into account.
+Shield of Faith absorbs damage before health does. The attack now subtracts the current shield from the expected damage before counting the loss of HP. Without this, the shield would never look useful to the character, because the model ignored it
+
+4. A mana potion does not change any of the goals directly, so the character never saw a reason to pick it up. But mana lets him use Divine Smite, which kills skeletons for free and gives XP. 
+We estimate how many smites the potion would allow (2 mana each, limited by the skeletons still alive) and credit the Gain Level goal with half of the XP they would give.
+The half is a deliberate discount: that XP only arrives after more actions, so it should count for less than XP from an immediate attack.
+
+With this upgrades and a weight of 1, 1, 0.4, 0.8 for survive, level, be quick, get Rich we were finally able to win.

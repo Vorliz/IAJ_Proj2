@@ -24,7 +24,8 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.BehaviourTrees
             {
                 new Sequence(new List<Task>() {new MoveToInterruptible(orc, patrolPoint1, _range, player), new MoveToInterruptible(orc, patrolPoint2, _range, player)}),
                 //new Shout(orc, player); (sequence between shout and pursue?)
-                new Pursue(orc, player, _range),
+                // Pursue until in weapon range, then attack (same as the BasicTree used by the other monsters)
+                new Sequence(new List<Task>() {new Pursue(orc, player, _range), new LightAttack(orc)}),
             };
         }
     }

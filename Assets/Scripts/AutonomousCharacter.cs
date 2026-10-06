@@ -209,7 +209,7 @@ public class AutonomousCharacter : NPC
         {
             if (SwordAttack) { this.Actions.Add(new SwordAttack(this, enemy)); };
 
-            //if (DivineSmite) this.Actions.Add(new DivineSmite(this, enemy));
+            if (DivineSmite) this.Actions.Add(new DivineSmite(this, enemy));
         }
 
         foreach (var enemy in GameObject.FindGameObjectsWithTag("Orc"))
@@ -235,11 +235,11 @@ public class AutonomousCharacter : NPC
 
         foreach (var potion in GameObject.FindGameObjectsWithTag("ManaPotion"))
         {
-            //if (GetManaPotion) this.Actions.Add(new GetManaPotion(this, potion));
+            if (GetManaPotion) this.Actions.Add(new GetManaPotion(this, potion));
         }
 
         //Then we have a series of extra actions available to Sir Uthgard
-        //if (ShieldOfFaith) this.Actions.Add(new ShieldOfFaith(this));
+        if (ShieldOfFaith) this.Actions.Add(new ShieldOfFaith(this));
         if (LevelUp) this.Actions.Add(new LevelUp(this));
         //if (Teleport) this.Actions.Add(new Teleport(this));
         //if (Rest) this.Actions.Add(new Rest(this));
@@ -268,7 +268,9 @@ public class AutonomousCharacter : NPC
             } */
         }
 
-        DiaryText.text += "My Diary \n I awoke. What a wonderful day to kill Monsters! \n";
+        string intro = "My Diary \n I awoke. What a wonderful day to kill Monsters! \n";
+        FullDiary.Append(intro);
+        DiaryText.text += intro;
     }
 
     void FixedUpdate()
@@ -509,10 +511,20 @@ public class AutonomousCharacter : NPC
 
     public void AddToDiary(string s)
     {
-        DiaryText.text += Time.time + s + "\n";
+        string entry = Time.time + s + "\n";
+        FullDiary.Append(entry);
+        DiaryText.text += entry;
 
         if (DiaryText.text.Length > 1000)
             DiaryText.text = DiaryText.text.Substring(500);
+    }
+
+    // The UI diary is truncated to its last ~1000 characters, so the full history is kept here
+    private readonly System.Text.StringBuilder FullDiary = new System.Text.StringBuilder();
+
+    public void PrintDiaryToConsole()
+    {
+        Debug.Log("===== FULL DIARY =====\n" + FullDiary);
     }
 
 

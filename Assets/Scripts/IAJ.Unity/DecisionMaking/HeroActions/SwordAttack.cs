@@ -2,6 +2,7 @@
 using Assets.Scripts.IAJ.Unity.Utils;
 using System;
 using UnityEngine;
+using Assets.Scripts.Game.NPCs;
 
 namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 {
@@ -44,6 +45,12 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
                 this.expectedXPChange = 10.0f;
                 this.enemyAC = 18;
             }
+
+            // Read the real values from the monster, so the model matches what GameManager does
+            var stats = target.GetComponent<Monster>().stats;
+            this.enemySimpleDamage = stats.SimpleDamage;
+            this.xpChange = stats.XPvalue;
+            this.enemyAC = stats.AC;
         }
 
         public override float GetGoalChange(Goal goal)
@@ -52,11 +59,18 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 
             if (goal.Name == AutonomousCharacter.SURVIVE_GOAL)
             {
-                change += this.expectedHPChange;
+                float damage = GameManager.Instance.StochasticWorld ? this.expectedHPChange : this.enemySimpleDamage;
+                float damageToHP = Mathf.Max(0, damage - Character.baseStats.ShieldHP); // the shield absorbs damage first
+
+                if (damageToHP >= Character.baseStats.HP)
+                    change += goal.Max;   // this attack would kill me
+                else
+                    change += damageToHP;
             }
             else if (goal.Name == AutonomousCharacter.GAIN_LEVEL_GOAL)//ToDo You can add here something...
             {
-                change += -this.expectedXPChange;
+                float xp = GameManager.Instance.StochasticWorld ? this.expectedXPChange : this.xpChange;
+                change -= xp / (Character.baseStats.Level * 10);   // fraction of a level
             }
 
             return change;

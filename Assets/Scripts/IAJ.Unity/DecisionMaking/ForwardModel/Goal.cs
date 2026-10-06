@@ -34,7 +34,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
 
         public float NormalizeGoalValue(float value, float min, float max)
         {
-            if (value < 0) value = 0.0f;
+            if (value < min) value = min;
             if (value > max) value = max;
             // Avoid division by zero when min == max
             var range = max - min;

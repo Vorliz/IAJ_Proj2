@@ -53,7 +53,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 
             if (goal.Name == AutonomousCharacter.GAIN_LEVEL_GOAL)
             {
-                change = -goal.InsistenceValue;
+                change -= 1;
             }
             else if (goal.Name == AutonomousCharacter.BE_QUICK_GOAL)
             {
