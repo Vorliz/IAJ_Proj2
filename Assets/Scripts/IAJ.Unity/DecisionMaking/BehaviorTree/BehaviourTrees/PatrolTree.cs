@@ -13,12 +13,12 @@ using System.Runtime.CompilerServices;
 
 namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.BehaviourTrees
 {
-   class PatrolTree : Selector
+    class PatrolTree : Sequence
     {
+        private Orc orc;
+
         public PatrolTree(Orc orc, GameObject player, float _range) {
-            // To create a new tree you need to create each branch which is done using the constructors of different tasks
-            // Additionally it is possible to create more complex behaviour by combining different tasks and composite tasks...
-            bool heardShout = false;
+            this.orc = orc;
             this.children = new List<Task>()
             {
                 new Parallel(new List<Task>()
@@ -28,22 +28,21 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.BehaviourTrees
                         new MoveTo(orc, orc.PatrolPoint2, _range)
                     }),
                     new IsCharacterFarTarget(orc, player, orc.stats.AwakeDistance),
-                    new HeardShout(orc, out heardShout),
+                    new HeardShout(orc),
                 }),
-                new Conditional(new List<Task>()
-                {
-                    new Parallel(new List<Task>()
-                    {
-                        new IsCharacterFarTarget(orc, player, orc.stats.AwakeDistance),
-                        new MoveTo(orc, ShoutLocation, _range),
-                    }),
-                    new Shout(orc),
-                }, heardShout),
-                new Sequence(new List<Task>() {
+                new MoveToShout(orc, player, _range),
+                new Shout(orc),
+                new RepeatUntilFailure(new Sequence(new List<Task>() {
                     new Pursue(orc, player, _range),
                     new LightAttack(orc),
-                }),
+                })),
             };
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            this.orc.HeardShout = false;
         }
     }
 }

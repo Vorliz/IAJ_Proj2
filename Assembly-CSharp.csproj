@@ -49,9 +49,9 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.6.0f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.6.0f1\Editor\Data\Tools\BuildPipeline\Unity.Analyzers.Common\Unity.Analyzers.Common.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.6.0f1\Editor\Data\Tools\BuildPipeline\Unity.Analyzers.LongLiving\Unity.Analyzers.LongLiving.dll" />
-    <Analyzer Include="C:\Users\alber\Downloads\IAJ-DecisionMaking\IAJ-DecisionMaking\Library\PackageCache\com.unity.ai.inference@9a123aee5df7\Runtime\Core\SourceGenerator\SourceGenerators.dll" />
-    <Analyzer Include="C:\Users\alber\Downloads\IAJ-DecisionMaking\IAJ-DecisionMaking\Library\PackageCache\com.unity.dt.app-ui@cd5609b130ce\Runtime\SourceGenerators\netstandard2.0\EnumToLowerCase.dll" />
-    <Analyzer Include="C:\Users\alber\Downloads\IAJ-DecisionMaking\IAJ-DecisionMaking\Library\PackageCache\com.unity.dt.app-ui@cd5609b130ce\Runtime\MVVM\SourceGenerators\netstandard2.0\MVVMSourceGenerators.dll" />
+    <Analyzer Include="C:\Users\alber\Documents\tecnicar\IAJ_Proj2\Library\PackageCache\com.unity.ai.inference@9a123aee5df7\Runtime\Core\SourceGenerator\SourceGenerators.dll" />
+    <Analyzer Include="C:\Users\alber\Documents\tecnicar\IAJ_Proj2\Library\PackageCache\com.unity.dt.app-ui@cd5609b130ce\Runtime\SourceGenerators\netstandard2.0\EnumToLowerCase.dll" />
+    <Analyzer Include="C:\Users\alber\Documents\tecnicar\IAJ_Proj2\Library\PackageCache\com.unity.dt.app-ui@cd5609b130ce\Runtime\MVVM\SourceGenerators\netstandard2.0\MVVMSourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.6.0f1\Editor\Data\BCLExtensions\TargetingPacks\netstandard2.1\analyzers\dotnet\roslyn4.0\cs\Microsoft.Extensions.Logging.Generators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.6.0f1\Editor\Data\BCLExtensions\TargetingPacks\netstandard2.1\analyzers\dotnet\roslyn4.0\cs\System.Text.Json.SourceGeneration.dll" />
   </ItemGroup>
@@ -94,6 +94,7 @@
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\Pair.cs" />
     <Compile Include="Assets\External\CodeMonkey\MonoBehaviours\CameraFollowSetup.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\Selector.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\OrcTasks\MoveToShout.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\ForwardModel\DictionaryWorldModel.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\PrirorityQueue.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\Parallel.cs" />
@@ -133,6 +134,7 @@
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\RandomHelper.cs" />
     <Compile Include="Assets\External\CodeMonkey\MonoBehaviours\ComponentActions.cs" />
     <Compile Include="Assets\External\Character\CommodityProgect\CommodityShowScript\DestorySelf.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\RepeatUntilFailure.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\GetHealthPotion.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\MCTS\MCTS.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\Transitions\EnemyDetected.cs" />

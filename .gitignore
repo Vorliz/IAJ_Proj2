@@ -1,3 +1,8 @@
 Temp/*
 Library/*
 Logs/*
+*.meta
+.vscode/*
+*.sln
+*.slnx
+*.csproj

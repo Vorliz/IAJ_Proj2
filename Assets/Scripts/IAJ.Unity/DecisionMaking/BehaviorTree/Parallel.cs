@@ -29,7 +29,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree
                 if (result == Result.Failure)
                 {
                     Reset();
-                    return Result.Failure;
+                    return Result.Success;
                 }
 
                 child.Reset();

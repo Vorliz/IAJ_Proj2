@@ -76,6 +76,12 @@ namespace Assets.Scripts.Game.NPCs
             this.BehaviourTree = new PatrolTree(this, Target, this.stats.WeaponRange);
         }
 
+        public void HearShout(Vector3 position)
+        {
+            this.ShoutPosition = position;
+            this.HeardShout = true;
+        }
+
 
         //If you use a folder structure for each pair of Patrolpoints, you can use the following method to get the patrol points of the closest patrol to the orc.
         public void GetPatrolPoints (out Vector3 position1, out Vector3 position2)

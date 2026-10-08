@@ -1,11 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree
 {
     public class Conditional : CompositeTask
     {
-        bool Condition;
+        private readonly Func<bool> Condition;
         public Conditional(List<Task> tasks, bool condition) : base(tasks)
+        {
+            Condition = () => condition;
+        }
+
+        public Conditional(List<Task> tasks, Func<bool> condition) : base(tasks)
         {
             Condition = condition;
         }
@@ -20,7 +26,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree
             if (children == null || children.Count != 2)
                 return Result.Failure;
 
-            if (Condition)
+            if (Condition != null && Condition())
             {
                 return children[0].Run();
             }
