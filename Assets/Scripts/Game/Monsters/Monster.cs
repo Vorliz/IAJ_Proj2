@@ -45,6 +45,8 @@ namespace Assets.Scripts.Game.NPCs
         public bool usingFormation;
         public bool formationLeader;
 
+        public AudioSource AudioSource;
+
         public Vector3 DefaultPosition { get; private set; }
 
 
@@ -57,6 +59,8 @@ namespace Assets.Scripts.Game.NPCs
             this.usingStateMachine = GameManager.Instance.monsterControl == GameManager.MonsterControl.StateMachineMonsters;
 
             this.DefaultPosition = this.transform.position;
+
+            this.AudioSource = gameObject.GetComponent<AudioSource>();
 
             if (usingBehaviourTree)
                 InitializeBehaviourTree();
@@ -101,7 +105,7 @@ namespace Assets.Scripts.Game.NPCs
         {
             GameManager.Instance.EnemyAttack(this.gameObject);
         }
-        
+
         public bool InWeaponRange(GameObject target)
         {
             Vector3 targetDirection = target.transform.position - this.transform.position;

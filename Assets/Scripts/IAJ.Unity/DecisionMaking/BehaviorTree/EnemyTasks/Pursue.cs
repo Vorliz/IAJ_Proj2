@@ -47,6 +47,6 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.EnemyTasks
             }
 
         }
-
     }
+
 }

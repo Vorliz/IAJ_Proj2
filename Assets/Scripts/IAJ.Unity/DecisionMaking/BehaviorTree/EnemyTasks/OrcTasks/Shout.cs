@@ -1,43 +1,36 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using System.Threading.Tasks;
-using UnityEngine.AI;
 using Assets.Scripts.Game.NPCs;
 using Assets.Scripts.Game;
-using Unity.AppUI.UI;
-using UnityEngine.Rendering;
 
 namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.EnemyTasks
 {
     class Shout : Task
     {
-        protected Monster Character { get; set; }
+        protected Orc Orc { get; set; }
 
-        public float range;
-
-        public Shout(Monster character)
+        public Shout(Orc orc)
         {
-            this.Character = character;
+            this.Orc = orc;
         }
 
         public override Result Run()
         {
-            if (Character == null)
+            if (Orc == null)
                 return Result.Failure;
-            // spawn a ! on orc location
-            // counter should be on orcs - 1
-            // play sound
-            // make action for orcs to go to !
-            // if they see player, go to pursuit
-            // if they reach ! and they dont see player go back to patrol
-            var position = Character.transform.position;
 
-            var exclamationMark = new GameObject("!");
-            exclamationMark.transform.position = position;
-            exclamationMark.AddComponent<ShoutMarker>().Counter = GameManager.Instance.orcs.Count - 1;
+            var position = Orc.transform.position;
+            Orc.AudioSource.PlayOneShot(GameManager.Instance.ShoutAudio);
+
+            foreach (var orcObject in GameManager.Instance.orcs)
+            {
+                if (orcObject == null || orcObject == Orc.gameObject)
+                    continue;
+
+                var receiver = orcObject.GetComponent<Orc>();
+                if (receiver != null)
+                    receiver.HearShout(position);
+            }
+
             return Result.Success;
         }
 

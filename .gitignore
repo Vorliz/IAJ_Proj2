@@ -5,3 +5,7 @@ UserSettings/*
 *.csproj
 ProjectSettings/ProjectAuditorSettings.asset
 Notes/
+*.meta
+.vscode/*
+*.sln
+*.slnx

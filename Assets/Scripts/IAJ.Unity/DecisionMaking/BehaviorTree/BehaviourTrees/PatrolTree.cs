@@ -13,20 +13,36 @@ using System.Runtime.CompilerServices;
 
 namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.BehaviourTrees
 {
-   class PatrolTree : Selector
+    class PatrolTree : Sequence
     {
+        private Orc orc;
+
         public PatrolTree(Orc orc, GameObject player, float _range) {
-            // To create a new tree you need to create each branch which is done using the constructors of different tasks
-            // Additionally it is possible to create more complex behaviour by combining different tasks and composite tasks...
-            UnityEngine.Vector3 patrolPoint1, patrolPoint2;
-            orc.Get2NearestPatrolPoints(out patrolPoint1, out patrolPoint2);
+            this.orc = orc;
             this.children = new List<Task>()
             {
-                new Sequence(new List<Task>() {new MoveToInterruptible(orc, patrolPoint1, _range, player), new MoveToInterruptible(orc, patrolPoint2, _range, player)}),
-                //new Shout(orc, player); (sequence between shout and pursue?)
-                // Pursue until in weapon range, then attack (same as the BasicTree used by the other monsters)
-                new Sequence(new List<Task>() {new Pursue(orc, player, _range), new LightAttack(orc)}),
+                new Parallel(new List<Task>()
+                {
+                    new Sequence(new List<Task>() {
+                        new MoveTo(orc, orc.PatrolPoint1, _range),
+                        new MoveTo(orc, orc.PatrolPoint2, _range)
+                    }),
+                    new IsCharacterFarTarget(orc, player, orc.stats.AwakeDistance),
+                    new HeardShout(orc),
+                }),
+                new MoveToShout(orc, player, _range),
+                new Shout(orc),
+                new RepeatUntilFailure(new Sequence(new List<Task>() {
+                    new Pursue(orc, player, _range),
+                    new LightAttack(orc),
+                })),
             };
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            this.orc.HeardShout = false;
         }
     }
 }
