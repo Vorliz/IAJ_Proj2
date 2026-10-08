@@ -18,13 +18,31 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.BehaviourTrees
         public PatrolTree(Orc orc, GameObject player, float _range) {
             // To create a new tree you need to create each branch which is done using the constructors of different tasks
             // Additionally it is possible to create more complex behaviour by combining different tasks and composite tasks...
-            UnityEngine.Vector3 patrolPoint1, patrolPoint2;
-            orc.Get2NearestPatrolPoints(out patrolPoint1, out patrolPoint2);
+            bool heardShout = false;
             this.children = new List<Task>()
             {
-                new Sequence(new List<Task>() {new MoveToInterruptible(orc, patrolPoint1, _range, player), new MoveToInterruptible(orc, patrolPoint2, _range, player)}),
-                //new Shout(orc, player); (sequence between shout and pursue?)
-                new Pursue(orc, player, _range),
+                new Parallel(new List<Task>()
+                {
+                    new Sequence(new List<Task>() {
+                        new MoveTo(orc, orc.PatrolPoint1, _range),
+                        new MoveTo(orc, orc.PatrolPoint2, _range)
+                    }),
+                    new IsCharacterFarTarget(orc, player, orc.stats.AwakeDistance),
+                    new HeardShout(orc, out heardShout),
+                }),
+                new Conditional(new List<Task>()
+                {
+                    new Parallel(new List<Task>()
+                    {
+                        new IsCharacterFarTarget(orc, player, orc.stats.AwakeDistance),
+                        new MoveTo(orc, ShoutLocation, _range),
+                    }),
+                    new Shout(orc),
+                }, heardShout),
+                new Sequence(new List<Task>() {
+                    new Pursue(orc, player, _range),
+                    new LightAttack(orc),
+                }),
             };
         }
     }

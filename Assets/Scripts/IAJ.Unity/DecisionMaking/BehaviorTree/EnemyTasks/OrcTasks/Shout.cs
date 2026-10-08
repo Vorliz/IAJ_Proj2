@@ -14,18 +14,16 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.EnemyTasks
 {
     class Shout : Task
     {
-        protected Monster Character { get; set; }
+        protected Orc Orc { get; set; }
 
-        public float range;
-
-        public Shout(Monster character)
+        public Shout(Orc orc)
         {
-            this.Character = character;
+            this.Orc = orc;
         }
 
         public override Result Run()
         {
-            if (Character == null)
+            if (Orc == null)
                 return Result.Failure;
             // spawn a ! on orc location
             // counter should be on orcs - 1
@@ -33,12 +31,21 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.EnemyTasks
             // make action for orcs to go to !
             // if they see player, go to pursuit
             // if they reach ! and they dont see player go back to patrol
-            var position = Character.transform.position;
+            var position = Orc.transform.position;
 
-            var exclamationMark = new GameObject("!");
+            Orc.AudioSource.PlayOneShot(GameManager.Instance.ShoutAudio);
+
+            /*if (Orc.AlertSprite == null)
+                return Result.Failure;*/
+
+            /*var exclamationMark = new GameObject("!");
             exclamationMark.transform.position = position;
-            exclamationMark.AddComponent<ShoutMarker>().Counter = GameManager.Instance.orcs.Count - 1;
-            return Result.Success;
+            exclamationMark.AddComponent<SpriteRenderer>().sprite = Orc.AlertSprite;
+
+            var marker = exclamationMark.GetComponent<ShoutMarker>() ?? exclamationMark.AddComponent<ShoutMarker>();
+            marker.Counter = GameManager.Instance.orcs.Count - 1;
+            marker.Id = marker.GetEntityId();*/
+            return Result.Failure;
         }
 
     }

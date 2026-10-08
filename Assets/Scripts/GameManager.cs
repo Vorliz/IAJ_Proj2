@@ -59,6 +59,7 @@ public class GameManager : MonoBehaviour
     [Header("To Increase the Challange")]
     public bool StochasticWorld = false;
 
+    public AudioClip ShoutAudio;
 
     //fields
     public List<GameObject> chests { get; set; }
@@ -81,8 +82,7 @@ public class GameManager : MonoBehaviour
         UpdateDisposableObjects();
         this.InitialDisposableObjectsCount = this.disposableObjects.Count;
         this.WorldChanged = false;
-
-
+        this.ShoutAudio = Resources.Load<AudioClip>("orc_shout_audio");
         this.Character = GameObject.FindGameObjectWithTag("Player").GetComponent<AutonomousCharacter>();
         this.HPText = GameObject.Find("Health").GetComponent<Text>();
         this.XPText = GameObject.Find("XP:").GetComponent<Text>();
@@ -110,7 +110,7 @@ public class GameManager : MonoBehaviour
         this.enemies.AddRange(this.orcs);
         this.enemies.AddRange(this.dragons);
 
-     
+
         //adds all enemies to the disposable objects collection
         foreach (var enemy in this.enemies)
         {
@@ -191,7 +191,7 @@ public class GameManager : MonoBehaviour
 
         Monster monster = enemy.GetComponent<Monster>();
         Monster.EnemyStats enemyData = enemy.GetComponent<Monster>().stats;
-        
+
         if (enemy != null && enemy.activeSelf && InMeleeRange(enemy))
         {
             this.Character.AddToDiary(" I Sword Attacked " + enemy.name);
@@ -377,7 +377,7 @@ public class GameManager : MonoBehaviour
                 this.Character.StopTime = Time.time + AutonomousCharacter.LEVELING_INTERVAL;
             }
             else if (this.Character.StopTime < Time.time)
-            { 
+            {
                 this.Character.baseStats.Level++;
                 this.Character.baseStats.MaxHP += 10;
                 this.Character.baseStats.XP = 0;
@@ -466,7 +466,7 @@ public class GameManager : MonoBehaviour
 
     public bool InMeleeRange(GameObject enemy)
     {
-        
+
 
         return this.CheckRange(enemy, GameConstants.PICKUP_RANGE *2);
     }

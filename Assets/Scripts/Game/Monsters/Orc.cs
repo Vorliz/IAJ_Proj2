@@ -18,8 +18,11 @@ namespace Assets.Scripts.Game.NPCs
         public bool HeardShout;
         public Vector3 ShoutPosition;
         public bool IsAttacking;
+        public Vector3 PatrolPoint1;
+        public Vector3 PatrolPoint2;
+        /*public Sprite AlertSprite;
 
-        public GameObject AlertSprite;
+        private static Sprite defaultAlertSprite;*/
 
         public Orc()
         {
@@ -35,6 +38,33 @@ namespace Assets.Scripts.Game.NPCs
             this.IsAttacking = false;
         }
 
+        /*private static Sprite CreateDefaultAlertSprite()
+        {
+            const int textureSize = 128;
+            const float center = textureSize / 2f;
+            var texture = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false);
+            var pixels = new Color32[textureSize * textureSize];
+
+            for (int y = 0; y < textureSize; y++)
+            {
+                for (int x = 0; x < textureSize; x++)
+                {
+                    var point = new Vector2(x + 0.5f, y + 0.5f);
+                    var stemPoint = new Vector2(center, Mathf.Clamp(point.y, 52f, 106f));
+                    var stemAlpha = 1f - Mathf.SmoothStep(9.25f, 10.75f, Vector2.Distance(point, stemPoint));
+                    var dotAlpha = 1f - Mathf.SmoothStep(9.25f, 10.75f, Vector2.Distance(point, new Vector2(center, 23f)));
+                    var alpha = Mathf.Max(stemAlpha, dotAlpha);
+                    pixels[y * textureSize + x] = new Color32(255, 255, 255, (byte)Mathf.RoundToInt(alpha * 255f));
+                }
+            }
+
+            texture.SetPixels32(pixels);
+            texture.Apply();
+            texture.filterMode = FilterMode.Bilinear;
+            texture.wrapMode = TextureWrapMode.Clamp;
+            return Sprite.Create(texture, new Rect(0f, 0f, textureSize, textureSize), new Vector2(0.5f, 0.5f), 100f);
+        }*/
+
         public override void InitializeStateMachine()
         {
             this.StateMachine = new StateMachine(new Sleep(this));
@@ -42,6 +72,7 @@ namespace Assets.Scripts.Game.NPCs
 
         public override void InitializeBehaviourTree()
         {
+            this.Get2NearestPatrolPoints(out PatrolPoint1, out PatrolPoint2);
             this.BehaviourTree = new PatrolTree(this, Target, this.stats.WeaponRange);
         }
 

@@ -68,9 +68,11 @@
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\LevelUp.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\Actions\MoveTo.cs" />
     <Compile Include="Assets\External\CodeMonkey\MonoBehaviours\PositionRendererSorter.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\IsCharacterFarTarget.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\UI_Sprite.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\SerializableDictionary.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Formations\LineFormation.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\Conditional.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\StateMachine.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\SwordAttack.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\ScriptableObjectUtility.cs" />
@@ -94,6 +96,7 @@
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\Selector.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\ForwardModel\DictionaryWorldModel.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\PrirorityQueue.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\Parallel.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\Transitions\Transition.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\Reflection.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Formations\FormationPattern.cs" />
@@ -110,6 +113,7 @@
     <Compile Include="Assets\External\CodeMonkey\Utils\World_Bar.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\MoveToInterruptible.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\ForwardModel\WorldModel.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\OrcTasks\HeardShout.cs" />
     <Compile Include="Assets\Scripts\AutonomousCharacter.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\States\Sleep.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\States\Pursuit.cs" />
