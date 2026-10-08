@@ -428,7 +428,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void Rest()
+    /*public void Rest()
     {
         if (!this.Character.Resting)
         {
@@ -443,7 +443,7 @@ public class GameManager : MonoBehaviour
             this.Character.Resting = false;
             this.WorldChanged = true;
         }
-    }
+    }*/
 
     public void Teleport()
     {

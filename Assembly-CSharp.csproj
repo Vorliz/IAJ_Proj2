@@ -90,6 +90,7 @@
     <Compile Include="Assets\External\CodeMonkey\Utils\UI_BarMultiple.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\UI_TextComplex.cs" />
     <Compile Include="Assets\External\Character\CommodityProgect\CommodityShowScript\ObjMoveFront.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\LayOnHands.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\GetManaPotion.cs" />
     <Compile Include="Assets\Scripts\Game\Monsters\Skeleton.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\Pair.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\Reflection.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Formations\FormationPattern.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\Actions\IAction.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\Teleport.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\ForwardModel\PropertiesName.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\World_Mesh.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\Actions\LightAttack.cs" />

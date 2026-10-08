@@ -80,7 +80,7 @@ public class AutonomousCharacter : NPC
     public int GOAP_MaxDepth = DepthLimitedGOAPDecisionMaking.DEFAULT_MAX_DEPTH;
 
     [Header("Decision Algorithm Options")]
- 
+
     //[Header("Hero Actions")]
     public bool LevelUp = true;
     public bool GetHealthPotion = true;
@@ -241,8 +241,10 @@ public class AutonomousCharacter : NPC
         //Then we have a series of extra actions available to Sir Uthgard
         if (ShieldOfFaith) this.Actions.Add(new ShieldOfFaith(this));
         if (LevelUp) this.Actions.Add(new LevelUp(this));
-        //if (Teleport) this.Actions.Add(new Teleport(this));
-        //if (Rest) this.Actions.Add(new Rest(this));
+        if (LayOnHands) this.Actions.Add(new LayOnHands(this));
+        /*if (Rest) this.Actions.Add(new Rest(this)); rest doesn't seem that it should exist */
+        if (Teleport) this.Actions.Add(new Teleport(this));
+
 
 
         // Initialization of Decision Making Algorithms
