@@ -90,6 +90,7 @@
     <Compile Include="Assets\External\CodeMonkey\Utils\UI_BarMultiple.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\UI_TextComplex.cs" />
     <Compile Include="Assets\External\Character\CommodityProgect\CommodityShowScript\ObjMoveFront.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\GetManaPotion.cs" />
     <Compile Include="Assets\Scripts\Game\Monsters\Skeleton.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\Pair.cs" />
     <Compile Include="Assets\External\CodeMonkey\MonoBehaviours\CameraFollowSetup.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\States\Melee.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\CompositeTask.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\LevelCreator.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\DivineSmite.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\IsCharacterNearTarget.cs" />
     <Compile Include="Assets\External\CodeMonkey\MonoBehaviours\CameraFollow.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\World_Bar.cs" />
@@ -127,6 +129,7 @@
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\MathConstants.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\Button_Sprite.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\MoveTo.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\ShieldOfFaith.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\LevelDesignInspector.cs" />
     <Compile Include="Assets\Scripts\Game\Monsters\Monster.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\Utils\MathHelper.cs" />
