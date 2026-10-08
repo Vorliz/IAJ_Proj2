@@ -6,3 +6,4 @@ Logs/*
 *.sln
 *.slnx
 *.csproj
+UserSettings/*
