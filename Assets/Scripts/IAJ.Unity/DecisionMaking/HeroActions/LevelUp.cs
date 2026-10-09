@@ -6,6 +6,9 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 {
     public class LevelUp : Action
     {
+        // GameManager.LevelUp does nothing from this level on
+        private const int MAX_LEVEL = 4;
+
         public AutonomousCharacter Character { get; private set; }
 
         public LevelUp(AutonomousCharacter character) : base("LevelUp")
@@ -19,7 +22,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
             var level = Character.baseStats.Level;
             var xp = Character.baseStats.XP;
 
-            return xp >= level * 10;
+            return level < MAX_LEVEL && xp >= level * 10;
         }
 
         public override bool CanExecute(WorldModel worldModel)
@@ -27,7 +30,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
             int xp = (int)worldModel.GetProperty(PropertiesName.XP);
             int level = (int)worldModel.GetProperty(PropertiesName.LEVEL);
 
-            return xp >= level * 10;
+            return level < MAX_LEVEL && xp >= level * 10;
         }
 
         public override void Execute()
@@ -41,6 +44,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
             int level = (int)worldModel.GetProperty(PropertiesName.LEVEL);
             float time = (float)worldModel.GetProperty(PropertiesName.TIME);
 
+            worldModel.SetProperty(PropertiesName.DURATION, this.Duration);
             worldModel.SetProperty(PropertiesName.LEVEL, level + 1);
             worldModel.SetProperty(PropertiesName.MAXHP, maxHP + 10);
             worldModel.SetProperty(PropertiesName.XP, (int)0);

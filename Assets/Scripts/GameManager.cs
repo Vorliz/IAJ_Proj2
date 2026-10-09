@@ -16,6 +16,8 @@ public class GameManager : MonoBehaviour
         public const float UPDATE_INTERVAL = 2.0f;
         public const int TIME_LIMIT = 160;
         public const int PICKUP_RANGE = 3;
+        // a bit more than melee range
+        public const int DIVINE_SMITE_RANGE = PICKUP_RANGE * 4;
 
     }
     //public fields, seen by Unity in Editor
@@ -180,6 +182,7 @@ public class GameManager : MonoBehaviour
                 this.GameEnd.SetActive(true);
                 this.gameEnded = true;
                 this.GameEnd.GetComponentInChildren<Text>().text = "Victory \n GG EZ";
+                this.Character.PrintDiaryToConsole();
             }
         }
     }
@@ -474,7 +477,7 @@ public class GameManager : MonoBehaviour
 
     public bool InDivineSmiteRange(GameObject enemy)
     {
-        return this.CheckRange(enemy, GameConstants.PICKUP_RANGE * 10);
+        return this.CheckRange(enemy, GameConstants.DIVINE_SMITE_RANGE);
     }
 
     public bool InChestRange(GameObject chest)

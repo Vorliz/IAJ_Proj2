@@ -22,7 +22,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 
             var currentHP = (int)worldModel.GetProperty(Properties.HP);
             var maxHP = (int)worldModel.GetProperty(Properties.MAXHP);
-            return currentHP < maxHP;
+            return currentHP > 0 && currentHP < maxHP;
         }
 
         public override void Execute()

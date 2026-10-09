@@ -51,6 +51,7 @@ public class AutonomousCharacterEditor : Editor
             {
                 EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("GOAP_MaxDepth"), new GUIContent("Max Depth"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("GOAP_ActionCombinationsPerFrame"), new GUIContent("Action Combinations per Frame"));
             }
 
         }
