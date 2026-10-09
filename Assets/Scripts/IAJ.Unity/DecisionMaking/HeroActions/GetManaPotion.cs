@@ -6,6 +6,9 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 {
     public class GetManaPotion : WalkToTargetAndExecuteAction
     {
+        // MaxMana is 10
+        private const int POTION_MANA = 10;
+
         public GetManaPotion(AutonomousCharacter character, GameObject target) : base("GetManaPotion",character,target)
         {
         }
@@ -13,7 +16,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
         public override bool CanExecute()
         {
             if (!base.CanExecute()) return false;
-            return Character.baseStats.Mana < Character.baseStats.MaxMana;
+            return Character.baseStats.Mana < POTION_MANA;
         }
 
         public override bool CanExecute(WorldModel worldModel)
@@ -21,8 +24,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
             if (!base.CanExecute(worldModel)) return false;
 
             var currentMP = (int)worldModel.GetProperty(Properties.MANA);
-            var maxMP = (int)worldModel.GetProperty(Properties.MAXMANA);
-            return currentMP < maxMP;
+            return currentMP < POTION_MANA;
         }
 
         public override void Execute()
@@ -37,7 +39,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 
             if (goal.Name == AutonomousCharacter.GAIN_LEVEL_GOAL)
             {
-                int manaGained = 10 - Character.baseStats.Mana;                  // the potion fills mana to 10
+                int manaGained = POTION_MANA - Character.baseStats.Mana;         // the potion fills mana to 10
                 int skeletonsAlive = GameObject.FindGameObjectsWithTag("Skeleton").Length;
                 int smites = Mathf.Min(manaGained / 2, skeletonsAlive);          // 2 mana per smite
                 float xpToNextLevel = Character.baseStats.Level * 10;
@@ -52,9 +54,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
         public override void ApplyActionEffects(WorldModel worldModel)
         {
             base.ApplyActionEffects(worldModel);
-            var currentMP = (int)worldModel.GetProperty(Properties.MANA);
-            var maxMP = (int)worldModel.GetProperty(Properties.MAXMANA);
-            worldModel.SetProperty(Properties.MANA, maxMP);
+            worldModel.SetProperty(Properties.MANA, POTION_MANA);
 
             //disables the target object so that it can't be reused again
             worldModel.SetProperty(this.Target.name, false);

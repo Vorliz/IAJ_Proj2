@@ -73,8 +73,11 @@ namespace Assets.Scripts.Game
             var distance = 0.0f;
 
             NavMeshPath result = new();
-            var r = navMeshAgent.CalculatePath(targetPosition, result);
-            if (r == true)
+            // Path from originalPosition (the imagined position in the plan), not from the agent's real position.
+            // Both points are snapped onto the NavMesh because objects may sit slightly off it.
+            if (NavMesh.SamplePosition(originalPosition, out NavMeshHit startHit, 2.0f, navMeshAgent.areaMask) &&
+                NavMesh.SamplePosition(targetPosition, out NavMeshHit endHit, 2.0f, navMeshAgent.areaMask) &&
+                NavMesh.CalculatePath(startHit.position, endHit.position, navMeshAgent.areaMask, result))
             {
                 var currentPosition = originalPosition;
                 foreach (var c in result.corners)
@@ -88,6 +91,60 @@ namespace Assets.Scripts.Game
 
             //Default value
             return 100;
+        }
+
+        // For ranged actions: follows the NavMesh path from originalPosition towards targetPosition and stops at the first
+        // point whose straight-line distance to the target is <= range (that is when the action fires in the game).
+        // Returns the distance walked (same 0.5 scale as GetDistanceToTarget) and the position where the character stops.
+        public float GetDistanceUntilInRange(Vector3 originalPosition, Vector3 targetPosition, float range, out Vector3 stopPosition)
+        {
+            stopPosition = originalPosition;
+            if ((targetPosition - originalPosition).sqrMagnitude <= range * range) return 0.0f;
+
+            NavMeshPath result = new();
+            if (NavMesh.SamplePosition(originalPosition, out NavMeshHit startHit, 2.0f, navMeshAgent.areaMask) &&
+                NavMesh.SamplePosition(targetPosition, out NavMeshHit endHit, 2.0f, navMeshAgent.areaMask) &&
+                NavMesh.CalculatePath(startHit.position, endHit.position, navMeshAgent.areaMask, result))
+            {
+                var distance = 0.0f;
+                var currentPosition = originalPosition;
+                foreach (var c in result.corners)
+                {
+                    if ((targetPosition - c).sqrMagnitude <= range * range)
+                    {
+                        // the range is entered somewhere in the segment currentPosition -> c
+                        var entryPoint = GetRangeEntryPoint(currentPosition, c, targetPosition, range);
+                        distance += Vector3.Distance(currentPosition, entryPoint) * 0.5f;
+                        stopPosition = entryPoint;
+                        return distance;
+                    }
+                    distance += Vector3.Distance(currentPosition, c) * 0.5f;
+                    currentPosition = c;
+                }
+
+                // the path ended before entering the range: the character stops at the end of the path
+                stopPosition = currentPosition;
+                return distance;
+            }
+
+            //Default value
+            stopPosition = targetPosition;
+            return 100;
+        }
+
+        // First point of the segment start -> end at distance "range" from center (start is outside the range, end inside)
+        private static Vector3 GetRangeEntryPoint(Vector3 start, Vector3 end, Vector3 center, float range)
+        {
+            var d = end - start;
+            var f = start - center;
+            var a = Vector3.Dot(d, d);
+            if (a < 1e-6f) return start;
+
+            var b = 2.0f * Vector3.Dot(f, d);
+            var c = Vector3.Dot(f, f) - range * range;
+            var discriminant = Mathf.Max(0.0f, b * b - 4.0f * a * c);
+            var t = Mathf.Clamp01((-b - Mathf.Sqrt(discriminant)) / (2.0f * a));
+            return start + t * d;
         }
 
         #endregion

@@ -44,10 +44,34 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
             GameManager.Instance.DivineSmite(this.Target);
         }
 
+        // Divine Smite is ranged: the hero only walks until the skeleton is within DIVINE_SMITE_RANGE
+        public override float GetDuration()
+        {
+            return this.GetDuration(this.Character.transform.position, out _);
+        }
+
+        public override float GetDuration(WorldModel worldModel)
+        {
+            var position = (Vector3)worldModel.GetProperty(PropertiesName.POSITION);
+            return this.GetDuration(position, out _);
+        }
+
+        private float GetDuration(Vector3 currentPosition, out Vector3 castPosition)
+        {
+            var distance = this.Character.GetDistanceUntilInRange(currentPosition, this.Target.transform.position,
+                GameManager.GameConstants.DIVINE_SMITE_RANGE, out castPosition);
+            return distance / (2 * AutonomousCharacter.SPEED); // same formula as WalkToTargetAndExecuteAction
+        }
 
         public override void ApplyActionEffects(WorldModel worldModel)
         {
-            base.ApplyActionEffects(worldModel);
+            var position = (Vector3)worldModel.GetProperty(PropertiesName.POSITION);
+            var duration = this.GetDuration(position, out var castPosition);
+            var time = (float)worldModel.GetProperty(PropertiesName.TIME);
+
+            worldModel.SetProperty(PropertiesName.DURATION, duration);
+            worldModel.SetProperty(PropertiesName.TIME, time + duration);
+            worldModel.SetProperty(PropertiesName.POSITION, castPosition);
 
             int xp = (int)worldModel.GetProperty(PropertiesName.XP);
             int mana = (int)worldModel.GetProperty(PropertiesName.MANA);

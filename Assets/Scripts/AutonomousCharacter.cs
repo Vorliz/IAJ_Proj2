@@ -29,6 +29,8 @@ public class AutonomousCharacter : NPC
     public const float ENEMY_DETECTION_RADIUS = 10.0f;
     public const int REST_HP_RECOVERY = 2;
     public const float SPEED = 2.0f;
+    // Dying is the worst possible outcome
+    public const float DEATH_DISCONTENTMENT = 1000000.0f;
 
 
 
@@ -78,6 +80,7 @@ public class AutonomousCharacter : NPC
     public int MCTS_MaxPlayoutDepth = 100;
     public int MCTS_NumberPlayouts = 1;
     public int GOAP_MaxDepth = DepthLimitedGOAPDecisionMaking.DEFAULT_MAX_DEPTH;
+    public int GOAP_ActionCombinationsPerFrame = 2000;
 
     [Header("Decision Algorithm Options")]
  
@@ -320,7 +323,11 @@ public class AutonomousCharacter : NPC
             }
             else if (GOAPActive)
             {
+                // read every decision so the value can be tuned in the Inspector during Play mode
+                this.GOAPDecisionMaking.ActionCombinationsProcessedPerFrame = Mathf.Max(1, GOAP_ActionCombinationsPerFrame);
                 this.GOAPDecisionMaking.InitializeDecisionMakingProcess();
+                this.goapDecisionFrames = 0;
+                this.goapRootExecutableActions = this.GOAPDecisionMaking.InitialWorldModel.GetExecutableActions().Length;
             }
             else if (MCTSActive)
             {
@@ -478,6 +485,12 @@ public class AutonomousCharacter : NPC
             return 0.0f;
         }
 
+        // dying (or running out of time) is the worst thing that can happen
+        if (worldModel.IsLosingState())
+        {
+            return DEATH_DISCONTENTMENT;
+        }
+
         var discontentment = 0.0f;
 
         foreach (var goal in this.Goals)
@@ -522,9 +535,105 @@ public class AutonomousCharacter : NPC
     // The UI diary is truncated to its last ~1000 characters, so the full history is kept here
     private readonly System.Text.StringBuilder FullDiary = new System.Text.StringBuilder();
 
+    private bool reportPrinted;
+
+    // print data to the console after the game ends
+    private void OnApplicationQuit()
+    {
+        if (!this.reportPrinted) PrintDiaryToConsole();
+    }
+
     public void PrintDiaryToConsole()
     {
-        Debug.Log("===== FULL DIARY =====\n" + FullDiary);
+        this.reportPrinted = true;
+        // a single log, so everything can be copied at once
+        var report = "===== FULL DIARY =====\n" + FullDiary;
+        if (this.GOAPActive) report += "\n" + BuildGOAPSummary();
+        Debug.Log(report);
+    }
+
+    // GOAP statistics, accumulated after each completed decision and printed once at the end of the game
+    private int goapDecisionFrames;
+    private int goapRootExecutableActions;
+    private int goapDecisionCount;
+    private long goapTotalCombinations;
+    private int goapMinCombinations = int.MaxValue;
+    private int goapMaxCombinations;
+    private float goapTotalProcessingTime;
+    private float goapMaxProcessingTime;
+    private long goapTotalFrames;
+    private int goapMaxFrames;
+    private long goapTotalRootActions;
+    private int goapMaxRootActions;
+
+    private void RecordGOAPDecision()
+    {
+        var combinations = this.GOAPDecisionMaking.TotalActionCombinationsProcessed;
+        var processingTime = this.GOAPDecisionMaking.TotalProcessingTime;
+
+        this.goapDecisionCount++;
+        this.goapTotalCombinations += combinations;
+        this.goapMinCombinations = Mathf.Min(this.goapMinCombinations, combinations);
+        this.goapMaxCombinations = Mathf.Max(this.goapMaxCombinations, combinations);
+        this.goapTotalProcessingTime += processingTime;
+        this.goapMaxProcessingTime = Mathf.Max(this.goapMaxProcessingTime, processingTime);
+        this.goapTotalFrames += this.goapDecisionFrames;
+        this.goapMaxFrames = Mathf.Max(this.goapMaxFrames, this.goapDecisionFrames);
+        this.goapTotalRootActions += this.goapRootExecutableActions;
+        this.goapMaxRootActions = Mathf.Max(this.goapMaxRootActions, this.goapRootExecutableActions);
+    }
+
+    private string BuildGOAPSummary()
+    {
+        var goap = this.GOAPDecisionMaking;
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("===== GOAP SUMMARY =====");
+
+        string result;
+        if (baseStats.HP <= 0) result = "LOST (died)";
+        else if (baseStats.Time >= GameConstants.TIME_LIMIT) result = "LOST (time limit)";
+        else if (baseStats.Money >= 25) result = "WON";
+        else result = "game not finished";
+        sb.AppendLine("Result: " + result);
+        sb.AppendLine("Final state: HP " + baseStats.HP + "/" + baseStats.MaxHP
+            + " | Money " + baseStats.Money
+            + " | XP " + baseStats.XP
+            + " | Level " + baseStats.Level
+            + " | Mana " + baseStats.Mana + "/" + baseStats.MaxMana
+            + " | Time " + baseStats.Time.ToString("F1"));
+
+        sb.AppendLine("-- Settings --");
+        sb.AppendLine("Max depth: " + goap.MaxDepth + " | Combinations per frame: " + goap.ActionCombinationsProcessedPerFrame);
+        sb.AppendLine("Monsters: " + GameManager.Instance.monsterControl + " | Stochastic world: " + GameManager.Instance.StochasticWorld);
+        sb.Append("Goal weights:");
+        foreach (var goal in this.Goals)
+        {
+            sb.Append(" " + goal.Name + " " + goal.Weight);
+        }
+        sb.AppendLine();
+
+        sb.AppendLine("-- Search statistics --");
+        if (this.goapDecisionCount == 0)
+        {
+            sb.Append("No GOAP decision was completed.");
+            return sb.ToString();
+        }
+
+        float avgRootActions = (float)this.goapTotalRootActions / this.goapDecisionCount;
+        sb.AppendLine("Decisions completed: " + this.goapDecisionCount);
+        sb.AppendLine("Executable actions at root (N): average " + avgRootActions.ToString("F1") + " | max " + this.goapMaxRootActions
+            + " | N^depth with average N: " + Mathf.Pow(avgRootActions, goap.MaxDepth).ToString("F0"));
+        sb.AppendLine("Action combinations processed: average " + (this.goapTotalCombinations / this.goapDecisionCount)
+            + " | min " + this.goapMinCombinations
+            + " | max " + this.goapMaxCombinations
+            + " | total " + this.goapTotalCombinations);
+        sb.AppendLine("Processing time per decision: average " + (this.goapTotalProcessingTime / this.goapDecisionCount).ToString("F4") + "s"
+            + " | max " + this.goapMaxProcessingTime.ToString("F4") + "s"
+            + " | total " + this.goapTotalProcessingTime.ToString("F3") + "s");
+        sb.Append("Frames per decision: average " + ((float)this.goapTotalFrames / this.goapDecisionCount).ToString("F1")
+            + " | max " + this.goapMaxFrames);
+
+        return sb.ToString();
     }
 
 
@@ -563,11 +672,15 @@ public class AutonomousCharacter : NPC
         {
             //choose an action using the GOB Decision Making process
             var action = this.GOAPDecisionMaking.ChooseAction();
+            this.goapDecisionFrames++;
             if (action != null && action != this.CurrentAction)
             {
                 this.CurrentAction = action;
                 newDecision = true;
             }
+
+            // the search just finished in this frame
+            if (!this.GOAPDecisionMaking.InProgress) RecordGOAPDecision();
         }
 
         this.TotalProcessingTimeText.text = "Process. Time: " + this.GOAPDecisionMaking.TotalProcessingTime.ToString("F");

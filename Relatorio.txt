@@ -44,7 +44,7 @@ Using sleeping monsters and Survival Goal Weight 1, Be Quick Goal 0.5 and Get Ri
 So he goes to the closest chest and one by one picks them until he wins.
 
 With behaviour tree monsters and the same weights the character manages to pick up chests while fighting eventual Orcs that run into him and avoiding skeletons.
-He picks up HealthPotions after fighting Orcs and eventually reached the last chest protected by the dragon where he ends up dying and loosing.
+He picks up HealthPotions after fighting Orcs and eventually reached the last chest protected by the dragon where he ends up dying and losing.
 GetGoalChange method, describes the actions and their consequences in the world state. 
 so we decided to improve it in four ways.
 Measuring XP in levels, not in raw points. The gain level goal is counted in levels.
@@ -53,10 +53,59 @@ Killing a skeleton (3 XP) at level 1 now counts as 0.3 of a level, Level Up coun
 Previously the character thought that dying was just "a bit less health". Now, before choosing a Sword Attack, the action checks whether the damage he would take is enough to bring his HP to zero. If it is, it reports the worst possible result for the Survive goal, so the character avoids suicidal fights unless something else is far more important.
 
 3. Taking the shield into account.
-Shield of Faith absorbs damage before health does. The attack now subtracts the current shield from the expected damage before counting the loss of HP. Without this, the shield would never look useful to the character, because the model ignored it
+Shield of Faith absorbs damage before health does. The attack now subtracts the current shield from the expected damage before counting the loss of HP. Without this, the shield would never look useful to the character, because the model ignored it.
 
 4. A mana potion does not change any of the goals directly, so the character never saw a reason to pick it up. But mana lets him use Divine Smite, which kills skeletons for free and gives XP. 
 We estimate how many smites the potion would allow (2 mana each, limited by the skeletons still alive) and credit the Gain Level goal with half of the XP they would give.
 The half is a deliberate discount: that XP only arrives after more actions, so it should count for less than XP from an immediate attack.
 
-With this upgrades and a weight of 1, 1, 0.4, 0.8 for survive, level, be quick, get Rich we were finally able to win.
+With these upgrades and a weight of 1, 1, 0.4, 0.8 for survive, level, be quick, get rich we were finally able to win.
+
+
+
+3. a) Unlike GOB we expected that GOAP being able to see in the future, would allow the character to better plan its actions. For example picking a mana potion to then be able to cast a spell and kill the skeleton protecting a chest.
+
+Testando com sleeping monster ativo e non-stochastic world com pesos (1; 0.4; 0.4; 0.2):
+Deu para reparar que o player escolhe ir buscar uma mana potion para depois invocar um escudo e eliminar o esqueleto que protege um chest.
+Mas talvez por escolha dos pesos o character acaba sempre por perder por tempo. Também reparámos que muitas vezes o character escolhe percorrer caminhos com inimigos e acaba por morrer para
+os mesmos quando tem pouca vida.
+
+
+b) We found that the character sometimes attacks enemies even when it has low health ending up dying because of it.
+Isto acontece porque morrer é tratado como ter HP = 0 em vez de um estado de discontentment máximo. Assim matar um inimigo que permite ganhar XP suficiente para subir de nível tem um discontentment menor mesmo que implique morrer.
+
+A forma que encontrámos de corrigir este problema foi tornar a morte a pior consequência possível. E nunca planear ações depois de perceber que uma das ações na cadeia leva à morte.
+IsLosing fica com um peso enorme para ser pior que tudo o resto, e não é possível beber poções de HP depois de uma ação que leva à morte.
+
+c) No nosso projeto ao expandir uma ação que permite vencer o discontentment é zero e o algoritmo recua sem expandir logo mesmo que a seguir viesse uma ação que fizesse o character morrer
+essa ação nunca é expandida.
+
+d) We also realized that very often the character will select objects to go to that are further
+away than other closer alternatives. This happens because in a sequence of actions like open chest 1 + open chest 2 independently of which one is closer changing the order of actions ends up
+with the same gold, HP, and time. So the discontentment is basically the same. So with a tie break of which combination was explored first while expanding the tree. The character
+will end up going to the far away chest half the time.
+
+Para resolver corrigimos um bug no código base em que o tempo até realizar uma ação era calculado utilizando a posição atual do player em vez da posição anterior a essa ação na cadeia.
+E implementámos uma alteração em chooseAction() para que quando duas sequências obtenham discontentments muito parecidos (~0.1) escolhemos aquela cuja primeira ação demora menos 
+tempo a executar.
+
+e) MaxDepth 3: Média de combinações processadas por decisão 1575 e máximo de 3914 e mínimo 2.
+Média de N ações executadas na raiz 11,4 e máximo 17.
+
+Tempo por decisão, média 0,05s e máximo 0,15s 1 ou 2 frames para 2000 combinações por frame.
+
+Para MaxDepth 4: cada folha ganha mais um nível com cerca de N ações.
+Como as ações vão diminuindo com os inimigos e items apanhados/derrotados N seria cerca de 10*
+
+Média 1575 x ~10 = 15000 - 18 000 combinações por decisão
+Máximo perto de 50 000
+E o tempo em média 0,5s e 2s no pior caso 8 frames em média e 25 no pior caso
+
+Nos testes reais os valores ficaram um pouco acima do esperado pois em todos os testes o herói morreu.
+Uma vez que o goap não prevê os ataques dos inimigos de volta.
+valores foram 23 214 média 56908 pior; n médio 14 tempo por decisão médio 0,63s e pior 1,87s equivalente a 12,2 / 29 frames respetivamente
+
+At depth 3 the algorithm processed on average 1575 action combinations per decision (max 3914), with 11.4 executable actions at the root on average, taking 0.05 s per decision (max 0.15 s).
+Since each extra level multiplies the combinations by roughly the number of available actions, we estimated ~10-14x more at depth 4: around 16 000 on average and 50 000 at worst.
+At depth 4 we measured 23 214 on average (max 56 908) and 0.63 s per decision (max 1.87 s, up to 29 frames), a ~14.7x increase that matches the 14 actions available on average in that run.
+The longer horizon did not help: the hero still died walking to the chest guarded by the Dragon, since the model does not simulate enemy attacks.
