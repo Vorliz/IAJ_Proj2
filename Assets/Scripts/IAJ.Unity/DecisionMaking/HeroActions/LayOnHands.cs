@@ -7,6 +7,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
     {
 
         private const int MANA_COST = 7;
+        private const int LEVEL_REQUIREMENT = 2;
         public AutonomousCharacter Character { get; private set; }
 
         public LayOnHands(AutonomousCharacter character) : base("LayOnHands")
@@ -16,7 +17,8 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 
         public override bool CanExecute()
         {
-            return Character.baseStats.Mana >= MANA_COST && Character.baseStats.HP < Character.baseStats.MaxHP;
+            return Character.baseStats.Mana >= MANA_COST && Character.baseStats.HP < Character.baseStats.MaxHP
+            && Character.baseStats.Level >= 2;
         }
 
         public override bool CanExecute(WorldModel worldModel)
@@ -24,8 +26,9 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
             int mana = (int)worldModel.GetProperty(PropertiesName.MANA);
             int hp = (int)worldModel.GetProperty(PropertiesName.HP);
             int maxHP = (int)worldModel.GetProperty(PropertiesName.MAXHP);
+            int level = (int)worldModel.GetProperty(PropertiesName.LEVEL);
 
-            return mana >= MANA_COST && hp < maxHP;
+            return mana >= MANA_COST && hp < maxHP && level >= LEVEL_REQUIREMENT;
         }
 
         public override void Execute()

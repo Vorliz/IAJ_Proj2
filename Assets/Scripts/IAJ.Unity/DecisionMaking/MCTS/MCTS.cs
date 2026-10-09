@@ -89,6 +89,9 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
                 }
 
                 float averageReward = totalReward / this.NumberPlayouts;
+                if (selectedNode.PlayerID != 0) {
+                    averageReward = -averageReward;
+                }
                 this.Backpropagate(selectedNode, averageReward);
 
                 this.CurrentIterations++;
@@ -96,8 +99,11 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
             }
 
             this.TotalProcessingTime = Time.realtimeSinceStartup - startTime;
+            if (this.FrameCurrentIterations >= this.MaxIterationsPerFrame)
+            {
+                return null;
+            }
             this.InProgress = false;
-
             return this.BestAction(this.InitialNode);
         }
 
@@ -118,34 +124,38 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
                 }
                 else
                 {
-                    currentNode = BestChild(currentNode);
+                    MCTSNode bestChild = BestUCTChild(currentNode);
+                    if (bestChild == null)
+                    {
+                        return currentNode;
+                    }
+                    currentNode = bestChild;
+                    CurrentDepth++;
+                    MaxSelectionDepthReached = Math.Max(MaxSelectionDepthReached, CurrentDepth);
                 }
-                //ToDo: check if the node is fully expanded, if not expand and return the new node
-                // If the node is fully expanded, select the best child and continue the loop
             }
             return currentNode;
         }
 
         protected virtual float Playout(WorldModel initialStateForPlayout)
         {
-            WorldModel currentState = initialStateForPlayout.GenerateChildWorldModel();
+            WorldModel currentState = initialStateForPlayout;
             int playoutDepth = 0;
             while (!currentState.IsTerminal() || playoutDepth <= PlayoutDepthLimit)
             {
-                var availableActions = currentState.GetExecutableActions();
-                if (availableActions == null || availableActions.Length == 0)
+                var availableAction = currentState.GetNextAction();
+                if (availableAction == null)
                 {
                     break;
                 }
                 playoutDepth++;
-                var selectedActionIndex = this.RandomGenerator.Next(availableActions.Length);
-                var selectedAction = availableActions[selectedActionIndex];
-
                 var nextState = currentState.GenerateChildWorldModel();
-                selectedAction.ApplyActionEffects(nextState);
+                availableAction.ApplyActionEffects(nextState);
                 currentState = nextState;
+                currentState.CalculateNextPlayer();
             }
 
+            MaxPlayoutDepthReached = Math.Max(MaxPlayoutDepthReached, playoutDepth);
             return currentState.GetScore();
         }
 
@@ -165,7 +175,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
             MCTSNode currentNode;
             var newState = parent.State.GenerateChildWorldModel();
             action.ApplyActionEffects(newState);
-            currentNode = new MCTSNode(newState) {Action = action};
+            currentNode = new MCTSNode(newState) { Action = action, Parent = parent };
             parent.ChildNodes.Add(currentNode);
             return currentNode;
         }

@@ -173,8 +173,6 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
             }
         }
 
-       
-
 
         /*public virtual int GetNextPlayer()
         {

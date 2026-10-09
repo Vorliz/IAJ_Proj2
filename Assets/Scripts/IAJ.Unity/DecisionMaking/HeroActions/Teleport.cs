@@ -8,10 +8,9 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
     public class Teleport : Action
     {
         private const int MANA_COST = 5;
+        private const int LEVEL_REQUIREMENT = 2;
 
         protected AutonomousCharacter Character { get; set; }
-
-        public GameObject Target { get; set; }
 
         public Teleport(AutonomousCharacter character) : base("Teleport")
         {
@@ -25,24 +24,28 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 
         public override bool CanExecute()
         {
-            return Character.baseStats.Mana >= MANA_COST;
+            return Character.baseStats.Mana >= MANA_COST && Character.baseStats.Level >= 2;
         }
 
         public override bool CanExecute(WorldModel worldModel)
         {
             int mana = (int)worldModel.GetProperty(PropertiesName.MANA);
+            int level = (int)worldModel.GetProperty(PropertiesName.LEVEL);
 
-            return mana >= MANA_COST;
+            return mana >= MANA_COST && level >= LEVEL_REQUIREMENT;
         }
 
         public override void Execute()
         {
-            this.Character.transform.position = this.Character.InitialPosition;
+            GameManager.Instance.Teleport();
         }
 
         public override void ApplyActionEffects(WorldModel worldModel)
         {
-            worldModel.SetProperty(PropertiesName.POSITION, Target.transform.position);
+            int mana = (int)worldModel.GetProperty(PropertiesName.MANA);
+            worldModel.SetProperty(PropertiesName.MANA, mana - MANA_COST);
+
+            worldModel.SetProperty(PropertiesName.POSITION, this.Character.InitialPosition);
         }
     }
 }

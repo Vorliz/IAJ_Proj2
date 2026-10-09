@@ -242,9 +242,8 @@ public class AutonomousCharacter : NPC
         if (ShieldOfFaith) this.Actions.Add(new ShieldOfFaith(this));
         if (LevelUp) this.Actions.Add(new LevelUp(this));
         if (LayOnHands) this.Actions.Add(new LayOnHands(this));
-        /*if (Rest) this.Actions.Add(new Rest(this)); rest doesn't seem that it should exist */
         if (Teleport) this.Actions.Add(new Teleport(this));
-
+        /*if (Rest) this.Actions.Add(new Rest(this)); rest doesn't seem that it should exist */
 
 
         // Initialization of Decision Making Algorithms
@@ -657,7 +656,7 @@ public class AutonomousCharacter : NPC
                 text += "My Level:" + endState.GetProperty(PropertiesName.LEVEL) + "\n";
                 text += "My HP:" + endState.GetProperty(PropertiesName.HP) + "\n";
                 text += "My Money:" + endState.GetProperty(PropertiesName.MONEY) + "\n";
-                text += "Time Passsed:" + endState.GetProperty(PropertiesName.TIME) + "\n";
+                text += "Time Passed:" + endState.GetProperty(PropertiesName.TIME) + "\n";
                 this.BestActionText.text = text;
                 if ((int)endState.GetProperty(PropertiesName.HP) < 0 || 
                     (float)endState.GetProperty(PropertiesName.TIME) > GameConstants.TIME_LIMIT)
