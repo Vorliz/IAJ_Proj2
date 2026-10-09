@@ -36,7 +36,6 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
         public float TotalProcessingTime { get; set; }
 
 
-
         public MCTS(WorldModel currentStateWorldModel, int maxIter, int maxIterFrame, int playouts, int playoutDepthLimit)
         {
             this.InitialState = currentStateWorldModel;
@@ -75,7 +74,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
                 return null;
             }
 
-            var startTime = Time.realtimeSinceStartup;
+            var processingTime = Time.realtimeSinceStartup;
             this.FrameCurrentIterations = 0;
 
             while (this.CurrentIterations < this.MaxIterations && this.FrameCurrentIterations < this.MaxIterationsPerFrame)
@@ -98,7 +97,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
                 this.FrameCurrentIterations++;
             }
 
-            this.TotalProcessingTime = Time.realtimeSinceStartup - startTime;
+            this.TotalProcessingTime += Time.realtimeSinceStartup - processingTime;
             if (this.FrameCurrentIterations >= this.MaxIterationsPerFrame)
             {
                 return null;
@@ -156,7 +155,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
             }
 
             MaxPlayoutDepthReached = Math.Max(MaxPlayoutDepthReached, playoutDepth);
-            return currentState.GetScore();
+            return currentState.GetFinalScore();
         }
 
         protected virtual void Backpropagate(MCTSNode node, float reward)

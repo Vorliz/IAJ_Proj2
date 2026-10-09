@@ -57,10 +57,17 @@ public class AutonomousCharacter : NPC
         MCTS_BiasedPlayout
     }
 
+    public enum MCTSWorldModelType
+    {
+        DictionaryWorldModel,
+        ArrayWorldModel
+    }
+
     [Header("Character Behaviour Algorithm")]
     [Tooltip("Here you choose what algorithm control Sir Uthgard")]
     [SerializeField]
     public CharacterControlType characterControl;
+    public MCTSWorldModelType mctsWorldModelType;
 
     public bool ReactToEnemy;
     [Tooltip("Finding an enemy makes the character replan")]
@@ -169,6 +176,25 @@ public class AutonomousCharacter : NPC
         MCTSActive = (characterControl == CharacterControlType.MCTS);
         MCTSBiasedPlayoutActive = (characterControl == CharacterControlType.MCTS_BiasedPlayout);
 
+        bool showGoalDiscontentment = !MCTSActive && !MCTSBiasedPlayoutActive;
+        Text[] goalDiscontentmentTexts =
+        {
+            this.SurviveGoalText,
+            this.GainXPGoalText,
+            this.BeQuickGoalText,
+            this.GetRichGoalText,
+            this.DiscontentmentText
+        };
+        foreach (Text goalText in goalDiscontentmentTexts)
+        {
+            goalText.gameObject.SetActive(showGoalDiscontentment);
+            if (!showGoalDiscontentment)
+            {
+                Image background = goalText.GetComponentInParent<Image>();
+                if (background != null) background.enabled = false;
+            }
+        }
+
 
         //initialization of the GOB decision making
         //let's start by creating 4 main goals
@@ -262,12 +288,16 @@ public class AutonomousCharacter : NPC
             }
             else if (this.MCTSActive)
             {
-                var worldModel = new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
+                WorldModel worldModel = this.mctsWorldModelType == MCTSWorldModelType.ArrayWorldModel
+                    ? new ArrayWorldModel(GameManager.Instance, this, this.Actions)
+                    : new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
                 this.MCTSDecisionMaking = new MCTS(worldModel, MCTS_MaxIterations, MCTS_MaxIterationsPerFrame, MCTS_NumberPlayouts, MCTS_MaxPlayoutDepth);
             }
             else if (this.MCTSBiasedPlayoutActive)
             {
-                var worldModel = new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
+                WorldModel worldModel = this.mctsWorldModelType == MCTSWorldModelType.ArrayWorldModel
+                    ? new ArrayWorldModel(GameManager.Instance, this, this.Actions)
+                    : new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
                 this.MCTSBiasedDecisionMaking = new MCTSBiasedPlayout(worldModel, MCTS_MaxIterations, MCTS_MaxIterationsPerFrame, MCTS_NumberPlayouts, MCTS_MaxPlayoutDepth);
             }
         }

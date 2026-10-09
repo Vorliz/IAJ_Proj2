@@ -155,6 +155,24 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
             return HP <= 0 || time >= GameManager.GameConstants.TIME_LIMIT;
         }
 
+        public override float GetFinalScore()
+        {
+            int money = (int)this.GetProperty(PropertiesName.MONEY);
+            int HP = (int)this.GetProperty(PropertiesName.HP);
+            int ShieldHP = (int)this.GetProperty(PropertiesName.ShieldHP);
+            int lvl = (int)this.GetProperty(PropertiesName.LEVEL);
+            float time = (float)this.GetProperty(PropertiesName.TIME);
+
+            if (HP <= 0 || time >= GameManager.GameConstants.TIME_LIMIT) //lose
+                return 0.0f;
+            else if (this.NextPlayer == 0 && money == 25 && HP > 0) //win
+                return 1.0f;
+            else
+            { // non-terminal state
+                return 0.0f;
+            }
+        }
+
         public override float GetScore()
         {
             int money = (int)this.GetProperty(PropertiesName.MONEY);

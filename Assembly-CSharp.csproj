@@ -152,6 +152,7 @@
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\BehaviourTrees\BasicTree.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\Transitions\ToMeleeCombat.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\FunctionUpdater.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\ForwardModel\ArrayWorldModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Resources\dungeonGrid.txt" />
