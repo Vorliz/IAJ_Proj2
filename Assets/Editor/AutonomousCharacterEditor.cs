@@ -26,7 +26,7 @@ public class AutonomousCharacterEditor : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("DivineSmite"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Teleport"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("LayOnHands"));
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("Rest"));
+        //EditorGUILayout.PropertyField(serializedObject.FindProperty("Rest"));
 
 
         // Display CharacterControlType enum field

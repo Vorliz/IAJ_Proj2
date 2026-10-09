@@ -129,15 +129,15 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
         protected virtual float Playout(WorldModel initialStateForPlayout)
         {
             WorldModel currentState = initialStateForPlayout.GenerateChildWorldModel();
-
-            while (!currentState.IsTerminal())
+            int playoutDepth = 0;
+            while (!currentState.IsTerminal() || playoutDepth <= PlayoutDepthLimit)
             {
                 var availableActions = currentState.GetExecutableActions();
                 if (availableActions == null || availableActions.Length == 0)
                 {
                     break;
                 }
-
+                playoutDepth++;
                 var selectedActionIndex = this.RandomGenerator.Next(availableActions.Length);
                 var selectedAction = availableActions[selectedActionIndex];
 

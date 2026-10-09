@@ -90,7 +90,7 @@ public class AutonomousCharacter : NPC
     public bool DivineSmite = true;
     public bool Teleport = false;
     public bool LayOnHands = false;
-    public bool Rest = false;
+    //public bool Rest = false;
 
 
 
