@@ -86,6 +86,7 @@
     <Compile Include="Assets\Scripts\Game\Properties.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\PickUpChest.cs" />
     <Compile Include="Assets\External\CodeMonkey\Assets.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\MCTS\MCTSBiasedPlayout.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\FunctionPeriodic.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\UI_BarMultiple.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\UI_TextComplex.cs" />

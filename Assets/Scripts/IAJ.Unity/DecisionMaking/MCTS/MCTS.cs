@@ -152,7 +152,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
                 var nextState = currentState.GenerateChildWorldModel();
                 availableAction.ApplyActionEffects(nextState);
                 currentState = nextState;
-                currentState.CalculateNextPlayer();
+                //currentState.CalculateNextPlayer();
             }
 
             MaxPlayoutDepthReached = Math.Max(MaxPlayoutDepthReached, playoutDepth);

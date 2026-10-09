@@ -114,7 +114,7 @@ public class AutonomousCharacter : NPC
     public GOBDecisionMaking GOBDecisionMaking { get; set; }
     public DepthLimitedGOAPDecisionMaking GOAPDecisionMaking { get; set; }
     public MCTS MCTSDecisionMaking { get; set; }
-    //public MCTSBiasedPlayout MCTSBiasedDecisionMaking { get; set; }
+    public MCTSBiasedPlayout MCTSBiasedDecisionMaking { get; set; }
     public Vector3 InitialPosition { get; set; }
 
     public GameObject nearEnemy { get; private set; }
@@ -265,11 +265,11 @@ public class AutonomousCharacter : NPC
                 var worldModel = new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
                 this.MCTSDecisionMaking = new MCTS(worldModel, MCTS_MaxIterations, MCTS_MaxIterationsPerFrame, MCTS_NumberPlayouts, MCTS_MaxPlayoutDepth);
             }
-            /*else if (this.MCTSBiasedPlayoutActive)
+            else if (this.MCTSBiasedPlayoutActive)
             {
                 var worldModel = new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
                 this.MCTSBiasedDecisionMaking = new MCTSBiasedPlayout(worldModel, MCTS_MaxIterations, MCTS_MaxIterationsPerFrame, MCTS_NumberPlayouts, MCTS_MaxPlayoutDepth);
-            } */
+            }
         }
 
         string intro = "My Diary \n I awoke. What a wonderful day to kill Monsters! \n";
@@ -334,10 +334,10 @@ public class AutonomousCharacter : NPC
             {
                 this.MCTSDecisionMaking.InitializeMCTSearch();
             }
-            /*else if (MCTSBiasedPlayoutActive)
+            else if (MCTSBiasedPlayoutActive)
             {
                 this.MCTSBiasedDecisionMaking.InitializeMCTSearch();
-            }*/
+            }
         }
 
         if (this.ControlledByPlayer)
@@ -383,10 +383,10 @@ public class AutonomousCharacter : NPC
         {
             this.UpdateMCTS(this.MCTSDecisionMaking);
         }
-        /*else if (this.MCTSBiasedPlayoutActive)
+        else if (this.MCTSBiasedPlayoutActive)
         {
             this.UpdateMCTS(this.MCTSBiasedDecisionMaking);
-        }*/
+        }
 
         if (this.CurrentAction != null)
         {
