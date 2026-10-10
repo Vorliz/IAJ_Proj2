@@ -69,6 +69,7 @@ public class GameManager : MonoBehaviour
     public List<GameObject> orcs { get; set; }
     public List<GameObject> dragons { get; set; }
     public List<GameObject> enemies { get; set; }
+    public List<FormationManager> Formations { get; set; }
     public Dictionary<string, List<GameObject>> disposableObjects { get; set; }
     public int InitialDisposableObjectsCount { get; set; }
     public bool WorldChanged { get; set; }
@@ -97,7 +98,27 @@ public class GameManager : MonoBehaviour
         this.GameEnd.GetComponent<RectTransform>().localScale *= 10;
         this.GameEnd.SetActive(false);
 
+        this.Formations = new List<FormationManager>();
 
+        if (this.formationSettings != FormationSettings.NoFormations)
+        {
+            FormationPattern pattern = this.formationSettings == FormationSettings.TriangleFormation
+                ? new TriangleFormation()
+                : new LineFormation();
+
+            var squad = new List<Monster>();
+            foreach (var orcName in new[] { "Orc5", "Orc4", "Orc3" })
+            {
+                var orc = this.orcs.Find(o => o.name == orcName);
+                squad.Add(orc.GetComponent<Monster>());
+            }
+
+            var leader = squad[0];
+
+            var formation = new FormationManager(squad, pattern, leader.transform.position, leader.transform.forward);
+
+            this.Formations.Add(formation);
+        }
     }
 
     public void UpdateDisposableObjects()
@@ -111,7 +132,6 @@ public class GameManager : MonoBehaviour
         this.enemies.AddRange(this.skeletons);
         this.enemies.AddRange(this.orcs);
         this.enemies.AddRange(this.dragons);
-
 
         //adds all enemies to the disposable objects collection
         foreach (var enemy in this.enemies)
@@ -184,6 +204,35 @@ public class GameManager : MonoBehaviour
                 this.GameEnd.GetComponentInChildren<Text>().text = "Victory \n GG EZ";
                 this.Character.PrintDiaryToConsole();
             }
+
+            foreach (var formation in this.Formations)
+            {
+                if (formation.SlotAssignment.Count == 0)
+                {
+                    continue;
+                }
+
+                bool playerDetected = formation.SlotAssignment.Keys.Any(orc =>
+                        Vector3.Distance(orc.transform.position, this.Character.transform.position) <= orc.stats.AwakeDistance);
+
+                if (playerDetected)
+                {
+                    formation.BreakFormation();
+                } else
+                {
+                    formation.UpdateSlots();
+                }
+            }
+
+        }
+    }
+
+    private void RemoveFromFormation(GameObject enemy)
+    {
+        var monster = enemy.GetComponent<Monster>();
+        if (monster != null && monster.FormationManager != null)
+        {
+            monster.FormationManager.RemoveCharacter(monster);
         }
     }
 
@@ -210,6 +259,7 @@ public class GameManager : MonoBehaviour
                 if (attackRoll >= enemyData.AC)
                 {
                     //there was an hit, enemy is destroyed, gain xp
+                    this.RemoveFromFormation(enemy);
                     this.enemies.Remove(enemy);
                     this.disposableObjects.Remove(enemy.name);
                     enemy.SetActive(false);
@@ -219,6 +269,7 @@ public class GameManager : MonoBehaviour
             else
             {
                 damage = enemyData.SimpleDamage;
+                this.RemoveFromFormation(enemy);
                 this.enemies.Remove(enemy);
                 this.disposableObjects.Remove(enemy.name);
                 enemy.SetActive(false);
@@ -264,6 +315,7 @@ public class GameManager : MonoBehaviour
                     if (attackRoll >= monster.stats.AC)
                     {
                         //there was an hit, enemy is destroyed, gain xp
+                        this.RemoveFromFormation(enemy);
                         this.enemies.Remove(enemy);
                         this.disposableObjects.Remove(enemy.name);
                         enemy.SetActive(false);
@@ -273,6 +325,7 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     damage = monster.stats.SimpleDamage;
+                    this.RemoveFromFormation(enemy);
                     this.enemies.Remove(enemy);
                     this.disposableObjects.Remove(enemy.name);
                     enemy.SetActive(false);
@@ -303,6 +356,7 @@ public class GameManager : MonoBehaviour
             {
                 this.Character.baseStats.XP += 3;
                 this.Character.AddToDiary(" I Smited " + enemy.name);
+                this.RemoveFromFormation(enemy);
                 this.enemies.Remove(enemy);
                 this.disposableObjects.Remove(enemy.name);
                 enemy.SetActive(false);
@@ -453,7 +507,7 @@ public class GameManager : MonoBehaviour
         if (this.Character.baseStats.Level >= 2 && this.Character.baseStats.Mana >= 5)
         {
             this.Character.AddToDiary(" With my Mana I teleported away from danger.");
-            this.Character.transform.position = this.Character.InitialPosition;
+            this.Character.TeleportTo(this.Character.InitialPosition);
             this.Character.baseStats.Mana -= 5;
             this.WorldChanged = true;
         }

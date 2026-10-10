@@ -50,9 +50,17 @@ namespace Assets.Scripts.IAJ.Unity.Formations
         public void UpdateSlotAssignements()
         {
             int i = 0; 
-            foreach(var npc in SlotAssignment.Keys)
+            foreach(var npc in SlotAssignment.Keys.ToList())
             {
                 SlotAssignment[npc] = i;
+
+                bool wasLeader = npc.formationLeader;
+                npc.formationLeader = (i == 0);
+                if(npc.formationLeader && !wasLeader)
+                {
+                    npc.SetFormationLeader();
+                }
+
                 i++;
             }
         }
@@ -108,6 +116,12 @@ namespace Assets.Scripts.IAJ.Unity.Formations
                 {
                     int slotNumber = SlotAssignment[npc];
                     var slot = Pattern.GetSlotLocation(this, slotNumber);
+
+                    // if a wall is between the leader and the slot, stop at the wall so the slot stays on the leader's side
+                    if (NavMesh.Raycast(anchor, slot, out NavMeshHit wallHit, NavMesh.AllAreas))
+                    {
+                        slot = wallHit.position;
+                    }
 
                     var locationPosition = anchor + orientationMatrix * slotNumber;
                     var locationOrientation = orientationMatrix + slot;

@@ -9,3 +9,5 @@ Notes/
 .vscode/*
 *.sln
 *.slnx
+# Unity crash recovery scenes
+[Aa]ssets/_Recovery/

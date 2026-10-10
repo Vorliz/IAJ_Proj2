@@ -62,6 +62,15 @@ namespace Assets.Scripts.Game
             }
         }
 
+        // Setting transform.position directly is overridden by the NavMeshAgent, so the agent must be warped
+        public void TeleportTo(Vector3 position)
+        {
+            navMeshAgent.Warp(position);
+            navMeshAgent.ResetPath();
+            // the agent is already at "position": the next StartPathfinding to any other target sets a new destination
+            this.previousTarget = position;
+        }
+
         public void StopPathfinding()
         {
             navMeshAgent.isStopped = true;

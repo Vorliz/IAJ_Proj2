@@ -43,6 +43,8 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
         public override void ApplyActionEffects(WorldModel worldModel)
         {
             int mana = (int)worldModel.GetProperty(PropertiesName.MANA);
+            //instant action: overwrite DURATION so the child doesn't inherit the parent's duration
+            worldModel.SetProperty(PropertiesName.DURATION, 0.0f);
             worldModel.SetProperty(PropertiesName.MANA, mana - MANA_COST);
 
             worldModel.SetProperty(PropertiesName.POSITION, this.Character.InitialPosition);

@@ -84,6 +84,13 @@ namespace Assets.Scripts.Game.NPCs
         void FixedUpdate()
         {
             if (GameManager.Instance.gameEnded) return;
+
+            // Monsters in formation should not act on their own
+            if(this.usingFormation && !this.formationLeader)
+            {
+                return;
+            }
+
             if (usingBehaviourTree)
             {
                 if (this.BehaviourTree != null)
@@ -140,7 +147,7 @@ namespace Assets.Scripts.Game.NPCs
 
         public virtual void SetFormationLeader()
         {
-            // ToDo
+            
         }
 
 

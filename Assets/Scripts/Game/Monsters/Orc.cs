@@ -15,6 +15,7 @@ namespace Assets.Scripts.Game.NPCs
 
     public class Orc : Monster
     {
+        private const float LeaderSpeedFactor = 0.7f;
         public bool HeardShout;
         public Vector3 ShoutPosition;
         public bool IsAttacking;
@@ -74,6 +75,16 @@ namespace Assets.Scripts.Game.NPCs
         {
             this.Get2NearestPatrolPoints(out PatrolPoint1, out PatrolPoint2);
             this.BehaviourTree = new PatrolTree(this, Target, this.stats.WeaponRange);
+
+            if (this.formationLeader)
+            {
+                this.SetFormationLeader();
+            }
+        }
+
+        public override void SetFormationLeader()
+        {
+            this.agent.speed *= LeaderSpeedFactor;
         }
 
         public void HearShout(Vector3 position)

@@ -40,6 +40,11 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
         {
             int mana = (int)worldModel.GetProperty(PropertiesName.MANA);
             int maxHP = (int)worldModel.GetProperty(PropertiesName.MAXHP);
+            float time = (float)worldModel.GetProperty(PropertiesName.TIME);
+
+            // the hero stands still for LAYONHANDS_INTERVAL while healing (see GameManager.LayOnHands)
+            worldModel.SetProperty(PropertiesName.DURATION, AutonomousCharacter.LAYONHANDS_INTERVAL);
+            worldModel.SetProperty(PropertiesName.TIME, time + AutonomousCharacter.LAYONHANDS_INTERVAL);
             worldModel.SetProperty(PropertiesName.MANA, mana - MANA_COST);
 
             worldModel.SetProperty(PropertiesName.HP, maxHP);

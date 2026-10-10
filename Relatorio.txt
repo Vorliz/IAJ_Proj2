@@ -109,3 +109,6 @@ At depth 3 the algorithm processed on average 1575 action combinations per decis
 Since each extra level multiplies the combinations by roughly the number of available actions, we estimated ~10-14x more at depth 4: around 16 000 on average and 50 000 at worst.
 At depth 4 we measured 23 214 on average (max 56 908) and 0.63 s per decision (max 1.87 s, up to 29 frames), a ~14.7x increase that matches the 14 actions available on average in that run.
 The longer horizon did not help: the hero still died walking to the chest guarded by the Dragon, since the model does not simulate enemy attacks.
+
+
+While playing we observated that the knight looses many times because he doesn't take into acount that the monsters will attack him when he walks past them, and doesn't see the proximity to them as a discontentment.
