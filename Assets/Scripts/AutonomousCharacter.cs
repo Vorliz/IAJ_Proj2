@@ -54,7 +54,8 @@ public class AutonomousCharacter : NPC
         GOB,
         GOAP,
         MCTS,
-        MCTS_BiasedPlayout
+        MCTS_BiasedPlayout,
+        MCTS_LimitedBiasedPlayout   // kept last so the values already saved in the scene don't shift
     }
 
     public enum MCTSWorldModelType
@@ -85,6 +86,8 @@ public class AutonomousCharacter : NPC
     public int MCTS_MaxIterations = 1000;
     public int MCTS_MaxIterationsPerFrame = 500;
     public int MCTS_MaxPlayoutDepth = 100;
+    [Tooltip("Playout depth used by MCTS_LimitedBiasedPlayout; the heuristic (GetScore) evaluates the state where the playout stops")]
+    public int MCTS_LimitedPlayoutDepth = 5;
     public int MCTS_NumberPlayouts = 1;
     public int GOAP_MaxDepth = DepthLimitedGOAPDecisionMaking.DEFAULT_MAX_DEPTH;
     public int GOAP_ActionCombinationsPerFrame = 2000;
@@ -173,7 +176,9 @@ public class AutonomousCharacter : NPC
         GOBActive = (characterControl == CharacterControlType.GOB);
         GOAPActive = (characterControl == CharacterControlType.GOAP);
         MCTSActive = (characterControl == CharacterControlType.MCTS);
-        MCTSBiasedPlayoutActive = (characterControl == CharacterControlType.MCTS_BiasedPlayout);
+        // the limited variant is the biased playout with a small depth limit
+        MCTSBiasedPlayoutActive = (characterControl == CharacterControlType.MCTS_BiasedPlayout
+                                   || characterControl == CharacterControlType.MCTS_LimitedBiasedPlayout);
 
         bool showGoalDiscontentment = !MCTSActive && !MCTSBiasedPlayoutActive;
         Text[] goalDiscontentmentTexts =
@@ -297,7 +302,10 @@ public class AutonomousCharacter : NPC
                 WorldModel worldModel = this.mctsWorldModelType == MCTSWorldModelType.ArrayWorldModel
                     ? new ArrayWorldModel(GameManager.Instance, this, this.Actions)
                     : new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
-                this.MCTSBiasedDecisionMaking = new MCTSBiasedPlayout(worldModel, MCTS_MaxIterations, MCTS_MaxIterationsPerFrame, MCTS_NumberPlayouts, MCTS_MaxPlayoutDepth);
+                int playoutDepth = this.characterControl == CharacterControlType.MCTS_LimitedBiasedPlayout
+                    ? MCTS_LimitedPlayoutDepth
+                    : MCTS_MaxPlayoutDepth;
+                this.MCTSBiasedDecisionMaking = new MCTSBiasedPlayout(worldModel, MCTS_MaxIterations, MCTS_MaxIterationsPerFrame, MCTS_NumberPlayouts, playoutDepth);
             }
         }
 

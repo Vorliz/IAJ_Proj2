@@ -87,10 +87,8 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
                     totalReward += this.Playout(selectedNode.State);
                 }
 
+                // the reward is always from the hero's (player 0) point of view; Backpropagate flips it per node
                 float averageReward = totalReward / this.NumberPlayouts;
-                if (selectedNode.PlayerID != 0) {
-                    averageReward = -averageReward;
-                }
                 this.Backpropagate(selectedNode, averageReward);
 
                 this.CurrentIterations++;
@@ -140,18 +138,21 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
         {
             WorldModel currentState = initialStateForPlayout;
             int playoutDepth = 0;
-            while (!currentState.IsTerminal() || playoutDepth <= PlayoutDepthLimit)
+            while (!currentState.IsTerminal() && playoutDepth < PlayoutDepthLimit)
             {
-                var availableAction = currentState.GetNextAction();
-                if (availableAction == null)
+                // random choice among the executable actions; GetNextAction() is not used here because it would
+                // consume the action enumerator of the node, which belongs to the expansion
+                var availableActions = currentState.GetExecutableActions();
+                if (availableActions == null || availableActions.Length == 0)
                 {
                     break;
                 }
+                var action = availableActions[this.RandomGenerator.Next(availableActions.Length)];
                 playoutDepth++;
                 var nextState = currentState.GenerateChildWorldModel();
-                availableAction.ApplyActionEffects(nextState);
+                action.ApplyActionEffects(nextState);
+                nextState.CalculateNextPlayer();
                 currentState = nextState;
-                //currentState.CalculateNextPlayer();
             }
 
             MaxPlayoutDepthReached = Math.Max(MaxPlayoutDepthReached, playoutDepth);
@@ -164,7 +165,8 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
             while (currentNode != null)
             {
                 currentNode.N = currentNode.N + 1;
-                currentNode.Q = currentNode.Q + reward;
+                // a good result for the hero (player 0) is a bad one for the enemy (player 1)
+                currentNode.Q = currentNode.Q + (currentNode.PlayerID == 0 ? reward : -reward);
                 currentNode = currentNode.Parent;
             }
         }
@@ -174,7 +176,9 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
             MCTSNode currentNode;
             var newState = parent.State.GenerateChildWorldModel();
             action.ApplyActionEffects(newState);
-            currentNode = new MCTSNode(newState) { Action = action, Parent = parent };
+            newState.CalculateNextPlayer();
+            // PlayerID is the player that executed the action leading to this node
+            currentNode = new MCTSNode(newState) { Action = action, Parent = parent, PlayerID = parent.State.GetNextPlayer() };
             parent.ChildNodes.Add(currentNode);
             return currentNode;
         }

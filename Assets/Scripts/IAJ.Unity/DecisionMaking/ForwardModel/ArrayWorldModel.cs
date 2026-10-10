@@ -11,8 +11,9 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
     public class ArrayWorldModel : WorldModel
     {
         private const int FixedPropertyCount = 14;
-        private const int DisposablePropertyCount = 15;
-        private const int PropertyCount = FixedPropertyCount + DisposablePropertyCount;
+        // one array position per disposable object (enemies, chests, potions), built from the real scene objects
+        private Dictionary<string, int> DisposableIndices { get; set; }
+        private int PropertyCount { get; set; }
         private object[] Properties { get; set; }
         private bool[] PropertyIsSet { get; set; }
         protected ArrayWorldModel Parent { get; set; }
@@ -21,6 +22,13 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
         //that corresponds to the character's perceptions of the current "real world"
         public ArrayWorldModel(GameManager gameManager, AutonomousCharacter character,  List<Action> actions)
         {
+            this.DisposableIndices = new Dictionary<string, int>();
+            foreach (var objectName in gameManager.disposableObjects.Keys)
+            {
+                this.DisposableIndices[objectName] = FixedPropertyCount + this.DisposableIndices.Count;
+            }
+            this.PropertyCount = FixedPropertyCount + this.DisposableIndices.Count;
+
             this.Properties = new object[PropertyCount];
             this.PropertyIsSet = new bool[PropertyCount];
             this.Actions = new List<Action>(actions);
@@ -33,6 +41,9 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
 
         public ArrayWorldModel(ArrayWorldModel parent)
         {
+            // children share the index map of the root
+            this.DisposableIndices = parent.DisposableIndices;
+            this.PropertyCount = parent.PropertyCount;
             this.Properties = new object[PropertyCount];
             this.PropertyIsSet = new bool[PropertyCount];
             this.Actions = new List<Action>(parent.Actions);
@@ -124,25 +135,14 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
                 PropertiesName.DURATION => 11,
                 PropertiesName.PreviousLEVEL => 12,
                 PropertiesName.PreviousMONEY => 13,
-                "Skeleton" => 14,
-                "Orc0" => 15,
-                "Orc1" => 16,
-                "Orc2" => 17,
-                "Mighty Dragon" => 18,
-                "Dragonite" => 19,
-                "Chest0" => 20,
-                "Chest1" => 21,
-                "Chest2" => 22,
-                "Chest3" => 23,
-                "Chest4" => 24,
-                "HealthPotion0" => 25,
-                "HealthPotion1" => 26,
-                "ManaPotion0" => 27,
-                "ManaPotion1" => 28,
                 _ => -1,
             };
 
-            return fixedIndex;
+            if (fixedIndex >= 0)
+                return fixedIndex;
+
+            // disposable objects (e.g. "Skelleton0", "Orc3", "Chest1") use the map built from the scene
+            return this.DisposableIndices.TryGetValue(propertyName, out int disposableIndex) ? disposableIndex : -1;
         }
 
         public override void SetGoalValue(string goalName, float goalValue)
@@ -179,8 +179,6 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
         {
             int money = (int)this.GetProperty(PropertiesName.MONEY);
             int HP = (int)this.GetProperty(PropertiesName.HP);
-            int ShieldHP = (int)this.GetProperty(PropertiesName.ShieldHP);
-            int lvl = (int)this.GetProperty(PropertiesName.LEVEL);
             float time = (float)this.GetProperty(PropertiesName.TIME);
 
             if (HP <= 0 || time >= GameManager.GameConstants.TIME_LIMIT) //lose
@@ -189,7 +187,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
                 return 1.0f;
             else
             { // non-terminal state
-                return timeAndMoneyScore(time, money) + levelScore(lvl) + hpScore(HP + ShieldHP) + timeScore(time);
+                return this.NonTerminalHeuristicScore();
             }
         }
 
@@ -207,26 +205,6 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
             { // non-terminal state
                 return 0.0f;
             }
-        }
-
-        private float timeAndMoneyScore(float time, int money)
-        {
-            return 0.01f * (money / time);
-        }
-
-        private float levelScore(int lvl)
-        {
-            return 0.03f * lvl;
-        }
-
-        private float hpScore(int HP)
-        {
-            return 0.11f * HP;
-        }
-
-        private float timeScore(float time)
-        {
-            return -0.01f * (time - GameManager.GameConstants.TIME_LIMIT);
         }
 
         /*public virtual int GetNextPlayer()
