@@ -21,7 +21,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
         {
             if (goal.Name == AutonomousCharacter.BE_QUICK_GOAL)
             {
-                return -1.0f;
+                return -15.0f;
             }
             else return 0.0f;
         }

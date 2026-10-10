@@ -50,7 +50,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 
             if (goal.Name == AutonomousCharacter.SURVIVE_GOAL)
             {
-                change -= (Character.baseStats.MaxShieldHp - Character.baseStats.ShieldHP) * 1.25f;
+                change -= (Character.baseStats.MaxShieldHp - Character.baseStats.ShieldHP) * 1.4f;
             }
 
             return change;

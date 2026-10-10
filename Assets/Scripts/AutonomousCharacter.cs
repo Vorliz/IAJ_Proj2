@@ -438,7 +438,7 @@ public class AutonomousCharacter : NPC
         var duration = Time.time - this.lastUpdateTime;
         // Max Health minus current Health
         this.SurviveGoal.Max = baseStats.MaxHP;
-        this.SurviveGoal.InsistenceValue = (float)(baseStats.MaxHP - baseStats.HP) / baseStats.MaxHP * 15.0f;
+        this.SurviveGoal.InsistenceValue = (float)(baseStats.MaxHP - baseStats.HP) / baseStats.MaxHP * 17.5f;
 
         // How much time has passed...
         this.BeQuickGoal.InsistenceValue += this.BeQuickGoal.ChangeRate * duration;

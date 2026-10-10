@@ -142,6 +142,7 @@
     <Compile Include="Assets\External\CodeMonkey\MonoBehaviours\ComponentActions.cs" />
     <Compile Include="Assets\External\Character\CommodityProgect\CommodityShowScript\DestorySelf.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\RepeatUntilFailure.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\Formations\FormationAnchor.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\GetHealthPotion.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\MCTS\MCTS.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\StateMachine\Transitions\EnemyDetected.cs" />

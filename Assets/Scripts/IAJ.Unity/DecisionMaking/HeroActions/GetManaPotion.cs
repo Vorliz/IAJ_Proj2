@@ -52,7 +52,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
                      Character.baseStats.Mana < LayOnHands.MANA_COST)
             {
                 int missingHP = Character.baseStats.MaxHP - Character.baseStats.HP;
-                change -= 0.3f * Mathf.Max(0, missingHP);
+                change -= 0.4f * Mathf.Max(0, missingHP);
             }
 
             return change;
