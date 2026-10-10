@@ -122,7 +122,52 @@ public class GameManager : MonoBehaviour
             var formation = new FormationManager(squad, pattern, leader.transform.position, leader.transform.forward);
 
             this.Formations.Add(formation);
+
+            if (pattern.FreeAnchor)
+            {
+                this.EnsureFormationAnchor(leader);
+            }
         }
+    }
+
+    private const float AnchorSpeedFactor = 0.7f;
+
+    private void EnsureFormationAnchor(Monster leader)
+    {
+        if (this.formationAnchor == null)
+        {
+            var anchorObject = GameObject.Find("FormationAnchor");
+            if (anchorObject == null)
+            {
+                Debug.LogWarning("FormationAnchor not found in the scene: creating one at the leader's position.");
+                anchorObject = new GameObject("FormationAnchor");
+                anchorObject.transform.position = leader.transform.position;
+            }
+
+            this.formationAnchor = anchorObject.GetComponent<NavMeshAgent>();
+            if (this.formationAnchor == null)
+            {
+                Debug.LogWarning("FormationAnchor has no NavMeshAgent: adding one.");
+                this.formationAnchor = anchorObject.AddComponent<NavMeshAgent>();
+            }
+        }
+
+        if (this.formationAnchor.GetComponent<FormationAnchor>() == null)
+        {
+            Debug.LogWarning("FormationAnchor script missing on the anchor object: adding it.");
+            this.formationAnchor.gameObject.AddComponent<FormationAnchor>();
+        }
+
+        // makes the anchor slower than the orcs so they can keep up with their slots
+        var orcAgent = leader.GetComponent<NavMeshAgent>();
+        if (orcAgent != null && this.formationAnchor.speed >= orcAgent.speed)
+        {
+            this.formationAnchor.speed = orcAgent.speed * AnchorSpeedFactor;
+        }
+
+        // invisible ghost: it neither pushes nor gets pushed by the orcs
+        this.formationAnchor.obstacleAvoidanceType = ObstacleAvoidanceType.NoObstacleAvoidance;
+        this.formationAnchor.avoidancePriority = 99;
     }
 
     public void UpdateDisposableObjects()
