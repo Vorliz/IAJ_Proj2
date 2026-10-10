@@ -36,15 +36,6 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
             return result;
         }
 
-        public override float GetGoalChange(Goal goal)
-        {
-            if (goal.Name == AutonomousCharacter.BE_QUICK_GOAL)
-            {
-                return this.GetDuration();
-            }
-            else return 0.0f;
-        }
-
         public override bool CanExecute()
         {
             return this.Target.activeInHierarchy;

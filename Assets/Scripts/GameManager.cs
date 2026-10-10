@@ -466,42 +466,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void DivineWrath()
-    {
-        if (this.Character.baseStats.Level >= 3 && this.Character.baseStats.Mana >= 10)
-        {
-            //kill all enemies in the map
-            foreach (var enemy in this.enemies)
-            {
-                this.Character.baseStats.XP += enemy.GetComponent<Monster>().stats.XPvalue;
-                this.Character.AddToDiary(" I used the Divine Wrath and all monsters were killed! \nSo ends a day's work...");
-                enemy.SetActive(false);
-                this.disposableObjects.Remove(enemy.name);
-                Object.Destroy(enemy);
-            }
-
-            enemies.Clear();
-            this.WorldChanged = true;
-        }
-    }
-
-    /*public void Rest()
-    {
-        if (!this.Character.Resting)
-        {
-            this.Character.AddToDiary(" I am resting");
-            this.Character.Resting = true;
-            this.Character.StopTime = Time.time + AutonomousCharacter.RESTING_INTERVAL;
-        }
-        else if (this.Character.StopTime < Time.time)
-        {
-            this.Character.baseStats.HP += AutonomousCharacter.REST_HP_RECOVERY;
-            this.Character.baseStats.HP = Mathf.Min(this.Character.baseStats.HP, this.Character.baseStats.MaxHP);
-            this.Character.Resting = false;
-            this.WorldChanged = true;
-        }
-    }*/
-
     public void Teleport()
     {
         if (this.Character.baseStats.Level >= 2 && this.Character.baseStats.Mana >= 5)

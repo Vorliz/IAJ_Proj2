@@ -39,7 +39,6 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
             {
                 change -= goal.InsistenceValue;
             }
- 
             return change;
         }
 

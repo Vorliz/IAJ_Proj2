@@ -47,6 +47,13 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
                 // 0.5 = discount: the XP is indirect and only comes after more actions
                 change -= 0.5f * smites * 3 / xpToNextLevel;
             }
+            else if (goal.Name == AutonomousCharacter.SURVIVE_GOAL &&
+                     Character.baseStats.Level >= LayOnHands.LEVEL_REQUIREMENT &&
+                     Character.baseStats.Mana < LayOnHands.MANA_COST)
+            {
+                int missingHP = Character.baseStats.MaxHP - Character.baseStats.HP;
+                change -= 0.3f * Mathf.Max(0, missingHP);
+            }
 
             return change;
         }

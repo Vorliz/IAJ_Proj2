@@ -37,8 +37,9 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.GOB
             foreach (var goal in goals)
             {
                  // Calculate the new value after the action
-                 //+ duration * goal.ChangeRate retirada porque o be quick já é calculado noutro lado
                 float changeValue = action.GetGoalChange(goal);
+                if (goal.Name == AutonomousCharacter.BE_QUICK_GOAL)
+                    changeValue += duration * goal.ChangeRate;
                 
                 // The change rate is how much the goals changes per time
                 var newValue = goal.NormalizeGoalValue(goal.InsistenceValue + changeValue, goal.Min, goal.Max);
@@ -53,6 +54,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.GOB
         {
             // Find the action leading to the lowest discontentment
             Action bestAction = null;
+            float bestActionDiscontentment = float.MaxValue;
             secondBestAction = null;
             thirdBestAction = null;
             ActionDiscontentment.Clear();
@@ -64,11 +66,12 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.GOB
                     var discontentmentValue = CalculateDiscontentment(action, goals, character);
                     ActionDiscontentment[action] = discontentmentValue;
                     // The values are read from ActionDiscontentment, so only the actions need to be shifted down
-                    if (bestAction == null || discontentmentValue < ActionDiscontentment[bestAction])
+                    if (bestAction == null || discontentmentValue < bestActionDiscontentment || (discontentmentValue == bestActionDiscontentment && action.GetDuration() < bestAction.GetDuration()))
                     {
                         thirdBestAction = secondBestAction;
                         secondBestAction = bestAction;
                         bestAction = action;
+                        bestActionDiscontentment = discontentmentValue;
                     } else if (secondBestAction == null || discontentmentValue < ActionDiscontentment[secondBestAction])
                     {
                         thirdBestAction = secondBestAction;
@@ -79,7 +82,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.GOB
                     }
 
                 }
-            } 
+            }
 
             InProgress = false;
             return bestAction;

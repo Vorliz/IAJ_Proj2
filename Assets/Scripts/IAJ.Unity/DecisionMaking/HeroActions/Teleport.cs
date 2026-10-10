@@ -19,7 +19,11 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
 
         public override float GetGoalChange(Goal goal)
         {
-            return 0.0f;
+            if (goal.Name == AutonomousCharacter.BE_QUICK_GOAL)
+            {
+                return -1.0f;
+            }
+            else return 0.0f;
         }
 
         public override bool CanExecute()

@@ -6,19 +6,20 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
     public class LayOnHands : Action
     {
 
-        private const int MANA_COST = 7;
-        private const int LEVEL_REQUIREMENT = 2;
+        internal const int MANA_COST = 7;
+        internal const int LEVEL_REQUIREMENT = 2;
         public AutonomousCharacter Character { get; private set; }
 
         public LayOnHands(AutonomousCharacter character) : base("LayOnHands")
         {
             this.Character = character;
+            this.Duration = AutonomousCharacter.LAYONHANDS_INTERVAL;
         }
 
         public override bool CanExecute()
         {
             return Character.baseStats.Mana >= MANA_COST && Character.baseStats.HP < Character.baseStats.MaxHP
-            && Character.baseStats.Level >= 2;
+            && Character.baseStats.Level >= LEVEL_REQUIREMENT;
         }
 
         public override bool CanExecute(WorldModel worldModel)
@@ -53,7 +54,14 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
         public override float GetGoalChange(Goal goal)
         {
             /* is it needed?*/
-            return 0.0f;
+            var change = base.GetGoalChange(goal);
+
+            if (goal.Name == AutonomousCharacter.SURVIVE_GOAL)
+            {
+                change -= Character.baseStats.MaxHP - Character.baseStats.HP;
+            }
+
+            return change;
         }
 
     }

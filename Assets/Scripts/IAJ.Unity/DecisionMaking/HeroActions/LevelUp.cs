@@ -59,10 +59,6 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
             {
                 change -= 1;
             }
-            else if (goal.Name == AutonomousCharacter.BE_QUICK_GOAL)
-            {
-                change += this.Duration;
-            }
             return change;
         }
 

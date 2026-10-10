@@ -95,12 +95,11 @@ public class AutonomousCharacter : NPC
     public bool LevelUp = true;
     public bool GetHealthPotion = true;
     public bool SwordAttack = true;
-    public bool GetManaPotion = false;
+    public bool GetManaPotion = true;
     public bool ShieldOfFaith = false;
     public bool DivineSmite = true;
     public bool Teleport = false;
-    public bool LayOnHands = false;
-    //public bool Rest = false;
+    public bool LayOnHands = true;
 
 
 
@@ -311,7 +310,7 @@ public class AutonomousCharacter : NPC
     {
         if (GameManager.Instance.gameEnded) return;
 
-        //Agent Perception 
+        //Agent Perception
         if (Time.time > this.lastEnemyCheckTime + ENEMY_NEAR_CHECK_INTERVAL)
         {
             GameObject enemy = CheckEnemies(ENEMY_DETECTION_RADIUS);
@@ -439,8 +438,8 @@ public class AutonomousCharacter : NPC
         var duration = Time.time - this.lastUpdateTime;
         // Max Health minus current Health
         this.SurviveGoal.Max = baseStats.MaxHP;
-        this.SurviveGoal.InsistenceValue = baseStats.MaxHP - baseStats.HP;
- 
+        this.SurviveGoal.InsistenceValue = (float)(baseStats.MaxHP - baseStats.HP) / baseStats.MaxHP * 15.0f;
+
         // How much time has passed...
         this.BeQuickGoal.InsistenceValue += this.BeQuickGoal.ChangeRate * duration;
 
@@ -460,7 +459,7 @@ public class AutonomousCharacter : NPC
             this.GetRichGoal.InsistenceValue -= goldDiff;
             this.previousGold = baseStats.Money;
         }
-        
+
         // Normalize goals to 0-10
         foreach (Goal goal in Goals) { goal.NormalizeGoalValue(goal.InsistenceValue, goal.Min, goal.Max); }
     }
@@ -534,7 +533,7 @@ public class AutonomousCharacter : NPC
     }
 
     // Normalize different goal values to 0-10 ranges according to their max
- 
+
 
     private GameObject CheckEnemies(float detectionRadius)
     {
@@ -678,6 +677,7 @@ public class AutonomousCharacter : NPC
             var action = this.GOBDecisionMaking.ChooseAction(this);
             if (action != null && action != this.CurrentAction)
             {
+                this.BeQuickGoal.InsistenceValue += action.GetDuration() * this.BeQuickGoal.ChangeRate;
                 this.CurrentAction = action;
                 newDecision = true;
                 if (newDecision)
@@ -783,7 +783,7 @@ public class AutonomousCharacter : NPC
             var q = mCTS.BestFirstChild.Q / mCTS.BestFirstChild.N;
             this.BestDiscontentmentText.text = "Best Exp. Q value: " + q.ToString("F05");
             var actionText = "";
- 
+
             foreach (var node in mCTS.BestSequence)
             {
                 actionText += "\n" + node.Action.Name + " (" + node.Q + "/" + node.N + ")";
@@ -791,7 +791,7 @@ public class AutonomousCharacter : NPC
             this.BestActionSequence.text = "Best Action Sequence: " + actionText;
 
             //What is the predicted state of the world?
-            var endState = mCTS.BestActionSequenceEndState; 
+            var endState = mCTS.BestActionSequenceEndState;
             var text = "";
             if (endState != null)
             {
@@ -801,7 +801,7 @@ public class AutonomousCharacter : NPC
                 text += "My Money:" + endState.GetProperty(PropertiesName.MONEY) + "\n";
                 text += "Time Passed:" + endState.GetProperty(PropertiesName.TIME) + "\n";
                 this.BestActionText.text = text;
-                if ((int)endState.GetProperty(PropertiesName.HP) < 0 || 
+                if ((int)endState.GetProperty(PropertiesName.HP) < 0 ||
                     (float)endState.GetProperty(PropertiesName.TIME) > GameConstants.TIME_LIMIT)
                 {
                     //stop here
@@ -822,7 +822,7 @@ public class AutonomousCharacter : NPC
 
     void DrawPath()
     {
-       
+
         lineRenderer.positionCount = navMeshAgent.path.corners.Length;
         lineRenderer.SetPosition(0, this.transform.position);
 
@@ -839,7 +839,7 @@ public class AutonomousCharacter : NPC
 
     }
 
- 
+
 
     //Player Controlled Character Stuff - Do not change
 
