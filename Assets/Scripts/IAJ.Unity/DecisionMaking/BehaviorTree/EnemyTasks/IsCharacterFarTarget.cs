@@ -31,11 +31,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.EnemyTasks
             {
                 return Result.Success;
             }
-            else {
-                Debug.Log("Near player");
-                return Result.Failure;
-            }
-
+            return Result.Failure;
         }
 
     }

@@ -21,15 +21,18 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree.BehaviourTrees
             this.orc = orc;
             this.children = new List<Task>()
             {
-                new Parallel(new List<Task>()
+                new Inverter(new Parallel(new List<Task>()
                 {
-                    new Sequence(new List<Task>() {
-                        new MoveTo(orc, orc.PatrolPoint1, _range),
-                        new MoveTo(orc, orc.PatrolPoint2, _range)
-                    }),
-                    new IsCharacterFarTarget(orc, player, orc.stats.AwakeDistance),
+                    new RepeatUntilFailure(new Sequence(new List<Task>() {
+                            new MoveTo(orc, orc.PatrolPoint1, _range),
+                            new MoveTo(orc, orc.PatrolPoint2, _range)
+                        })
+                    ),
+                    new RepeatUntilFailure(
+                        new IsCharacterFarTarget(orc, player, orc.stats.AwakeDistance)
+                    ),
                     new HeardShout(orc),
-                }),
+                })),
                 new MoveToShout(orc, player, _range),
                 new Shout(orc),
                 new RepeatUntilFailure(new Sequence(new List<Task>() {
