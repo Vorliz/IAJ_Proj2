@@ -370,10 +370,12 @@ public class AutonomousCharacter : NPC
             else if (MCTSActive)
             {
                 this.MCTSDecisionMaking.InitializeMCTSearch();
+                this.mctsDecisionFrames = 0;
             }
             else if (MCTSBiasedPlayoutActive)
             {
                 this.MCTSBiasedDecisionMaking.InitializeMCTSearch();
+                this.mctsDecisionFrames = 0;
             }
         }
 
@@ -585,9 +587,185 @@ public class AutonomousCharacter : NPC
     {
         this.reportPrinted = true;
         // a single log, so everything can be copied at once
-        var report = "===== FULL DIARY =====\n" + FullDiary;
-        if (this.GOAPActive) report += "\n" + BuildGOAPSummary();
+        var report = "===== FULL DIARY =====\n" + FullDiary + "\n" + BuildRunSummary();
         Debug.Log(report);
+        AppendRunResultCsv();
+    }
+
+    private string GetResult()
+    {
+        if (baseStats.HP <= 0) return "LOST (died)";
+        if (baseStats.Time >= GameConstants.TIME_LIMIT) return "LOST (time limit)";
+        if (baseStats.Money >= 25) return "WON";
+        return "game not finished";
+    }
+
+    private int GetMCTSPlayoutDepth()
+    {
+        return this.characterControl == CharacterControlType.MCTS_LimitedBiasedPlayout ? MCTS_LimitedPlayoutDepth : MCTS_MaxPlayoutDepth;
+    }
+
+    // End of game summary for every algorithm: result, settings and search statistics (used for the algorithms comparison)
+    private string BuildRunSummary()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("===== " + this.characterControl + " SUMMARY =====");
+        sb.AppendLine("Result: " + GetResult());
+        sb.AppendLine("Final state: HP " + baseStats.HP + "/" + baseStats.MaxHP
+            + " | Money " + baseStats.Money
+            + " | XP " + baseStats.XP
+            + " | Level " + baseStats.Level
+            + " | Mana " + baseStats.Mana + "/" + baseStats.MaxMana
+            + " | Time " + baseStats.Time.ToString("F1"));
+
+        sb.AppendLine("-- Settings --");
+        sb.AppendLine("Monsters: " + GameManager.Instance.monsterControl + " | Stochastic world: " + GameManager.Instance.StochasticWorld
+            + " | React to enemy: " + this.ReactToEnemy);
+
+        if (this.GOBActive || this.GOAPActive)
+        {
+            sb.Append("Goal weights:");
+            foreach (var goal in this.Goals)
+            {
+                sb.Append(" " + goal.Name + " " + goal.Weight);
+            }
+            sb.AppendLine();
+        }
+
+        if (this.GOAPActive) sb.Append(BuildGOAPSummary());
+        else if (this.MCTSActive || this.MCTSBiasedPlayoutActive) sb.Append(BuildMCTSSummary());
+        else if (this.GOBActive) sb.Append(BuildGOBSummary());
+
+        return sb.ToString();
+    }
+
+    // one line per game, so the runs of each algorithm (win rate, times...) can be compared in a spreadsheet
+    private void AppendRunResultCsv()
+    {
+        if (this.ControlledByPlayer) return;
+
+        int decisions;
+        float totalTime;
+        if (this.GOAPActive) { decisions = this.goapDecisionCount; totalTime = this.goapTotalProcessingTime; }
+        else if (this.GOBActive) { decisions = this.gobDecisionCount; totalTime = this.gobTotalProcessingTime; }
+        else { decisions = this.mctsDecisionCount; totalTime = this.mctsTotalProcessingTime; }
+
+        bool isMCTS = this.MCTSActive || this.MCTSBiasedPlayoutActive;
+        var inv = System.Globalization.CultureInfo.InvariantCulture;
+        var line = string.Join(";",
+            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            this.characterControl,
+            isMCTS ? this.mctsWorldModelType.ToString() : "-",
+            isMCTS ? MCTS_MaxIterations.ToString() : "-",
+            isMCTS ? GetMCTSPlayoutDepth().ToString() : (this.GOAPActive ? GOAP_MaxDepth.ToString() : "-"),
+            GameManager.Instance.monsterControl,
+            GameManager.Instance.StochasticWorld,
+            this.ReactToEnemy,
+            GetResult(),
+            baseStats.Money,
+            baseStats.HP,
+            baseStats.Time.ToString("F1", inv),
+            decisions,
+            (decisions > 0 ? totalTime / decisions : 0f).ToString("F4", inv));
+
+        try
+        {
+            var path = System.IO.Path.Combine(Application.dataPath, "..", "RunResults.csv");
+            if (!System.IO.File.Exists(path))
+            {
+                System.IO.File.AppendAllText(path, "Date;Algorithm;WorldModel;MaxIterations;Depth;Monsters;Stochastic;ReactToEnemy;Result;Money;HP;GameTime;Decisions;AvgDecisionTime\n");
+            }
+            System.IO.File.AppendAllText(path, line + "\n");
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("Could not write RunResults.csv: " + e.Message);
+        }
+    }
+
+    // MCTS statistics (MCTS, Biased and Limited), accumulated after each completed decision
+    private int mctsDecisionFrames;
+    private int mctsDecisionCount;
+    private long mctsTotalIterations;
+    private int mctsMinIterations = int.MaxValue;
+    private int mctsMaxIterations;
+    private float mctsTotalProcessingTime;
+    private float mctsMaxProcessingTime;
+    private long mctsTotalFrames;
+    private int mctsMaxFrames;
+    private int mctsMaxPlayoutDepth;
+    private int mctsMaxSelectionDepth;
+
+    private void RecordMCTSDecision(MCTS mCTS)
+    {
+        this.mctsDecisionCount++;
+        this.mctsTotalIterations += mCTS.CurrentIterations;
+        this.mctsMinIterations = Mathf.Min(this.mctsMinIterations, mCTS.CurrentIterations);
+        this.mctsMaxIterations = Mathf.Max(this.mctsMaxIterations, mCTS.CurrentIterations);
+        this.mctsTotalProcessingTime += mCTS.TotalProcessingTime;
+        this.mctsMaxProcessingTime = Mathf.Max(this.mctsMaxProcessingTime, mCTS.TotalProcessingTime);
+        this.mctsTotalFrames += this.mctsDecisionFrames;
+        this.mctsMaxFrames = Mathf.Max(this.mctsMaxFrames, this.mctsDecisionFrames);
+        this.mctsMaxPlayoutDepth = Mathf.Max(this.mctsMaxPlayoutDepth, mCTS.MaxPlayoutDepthReached);
+        this.mctsMaxSelectionDepth = Mathf.Max(this.mctsMaxSelectionDepth, mCTS.MaxSelectionDepthReached);
+    }
+
+    private string BuildMCTSSummary()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("World model: " + this.mctsWorldModelType + " | Max iterations: " + MCTS_MaxIterations
+            + " | Iterations per frame: " + MCTS_MaxIterationsPerFrame + " | Playouts per node: " + MCTS_NumberPlayouts
+            + " | Playout depth limit: " + GetMCTSPlayoutDepth());
+
+        sb.AppendLine("-- Search statistics --");
+        if (this.mctsDecisionCount == 0)
+        {
+            sb.Append("No MCTS decision was completed.");
+            return sb.ToString();
+        }
+
+        sb.AppendLine("Decisions completed: " + this.mctsDecisionCount);
+        sb.AppendLine("Iterations per decision: average " + (this.mctsTotalIterations / this.mctsDecisionCount)
+            + " | min " + this.mctsMinIterations
+            + " | max " + this.mctsMaxIterations);
+        sb.AppendLine("Processing time per decision: average " + (this.mctsTotalProcessingTime / this.mctsDecisionCount).ToString("F4") + "s"
+            + " | max " + this.mctsMaxProcessingTime.ToString("F4") + "s"
+            + " | total " + this.mctsTotalProcessingTime.ToString("F3") + "s");
+        sb.AppendLine("Frames per decision: average " + ((float)this.mctsTotalFrames / this.mctsDecisionCount).ToString("F1")
+            + " | max " + this.mctsMaxFrames);
+        sb.Append("Max selection depth: " + this.mctsMaxSelectionDepth + " | Max playout depth: " + this.mctsMaxPlayoutDepth);
+
+        return sb.ToString();
+    }
+
+    // GOB statistics: GOB decides in a single frame, so only the number of decisions and the time are relevant
+    private int gobDecisionCount;
+    private float gobTotalProcessingTime;
+    private float gobMaxProcessingTime;
+
+    private void RecordGOBDecision(float processingTime)
+    {
+        this.gobDecisionCount++;
+        this.gobTotalProcessingTime += processingTime;
+        this.gobMaxProcessingTime = Mathf.Max(this.gobMaxProcessingTime, processingTime);
+    }
+
+    private string BuildGOBSummary()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("-- Search statistics --");
+        if (this.gobDecisionCount == 0)
+        {
+            sb.Append("No GOB decision was completed.");
+            return sb.ToString();
+        }
+
+        sb.AppendLine("Decisions completed: " + this.gobDecisionCount);
+        sb.Append("Processing time per decision: average " + (this.gobTotalProcessingTime / this.gobDecisionCount).ToString("F6") + "s"
+            + " | max " + this.gobMaxProcessingTime.ToString("F6") + "s"
+            + " | total " + this.gobTotalProcessingTime.ToString("F4") + "s");
+
+        return sb.ToString();
     }
 
     // GOAP statistics, accumulated after each completed decision and printed once at the end of the game
@@ -625,30 +803,7 @@ public class AutonomousCharacter : NPC
     {
         var goap = this.GOAPDecisionMaking;
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine("===== GOAP SUMMARY =====");
-
-        string result;
-        if (baseStats.HP <= 0) result = "LOST (died)";
-        else if (baseStats.Time >= GameConstants.TIME_LIMIT) result = "LOST (time limit)";
-        else if (baseStats.Money >= 25) result = "WON";
-        else result = "game not finished";
-        sb.AppendLine("Result: " + result);
-        sb.AppendLine("Final state: HP " + baseStats.HP + "/" + baseStats.MaxHP
-            + " | Money " + baseStats.Money
-            + " | XP " + baseStats.XP
-            + " | Level " + baseStats.Level
-            + " | Mana " + baseStats.Mana + "/" + baseStats.MaxMana
-            + " | Time " + baseStats.Time.ToString("F1"));
-
-        sb.AppendLine("-- Settings --");
         sb.AppendLine("Max depth: " + goap.MaxDepth + " | Combinations per frame: " + goap.ActionCombinationsProcessedPerFrame);
-        sb.AppendLine("Monsters: " + GameManager.Instance.monsterControl + " | Stochastic world: " + GameManager.Instance.StochasticWorld);
-        sb.Append("Goal weights:");
-        foreach (var goal in this.Goals)
-        {
-            sb.Append(" " + goal.Name + " " + goal.Weight);
-        }
-        sb.AppendLine();
 
         sb.AppendLine("-- Search statistics --");
         if (this.goapDecisionCount == 0)
@@ -682,7 +837,10 @@ public class AutonomousCharacter : NPC
         if (this.GOBDecisionMaking.InProgress)
         {
             //choose an action using the GOB Decision Making process
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var action = this.GOBDecisionMaking.ChooseAction(this);
+            stopwatch.Stop();
+            if (!this.GOBDecisionMaking.InProgress) RecordGOBDecision((float)stopwatch.Elapsed.TotalSeconds);
             if (action != null && action != this.CurrentAction)
             {
                 this.BeQuickGoal.InsistenceValue += action.GetDuration() * this.BeQuickGoal.ChangeRate;
@@ -770,6 +928,9 @@ public class AutonomousCharacter : NPC
         if (mCTS.InProgress)
         {
             var action = mCTS.ChooseAction();
+            this.mctsDecisionFrames++;
+            // the search just finished in this frame
+            if (!mCTS.InProgress) RecordMCTSDecision(mCTS);
             if (action != null)
             {
                 this.CurrentAction = action;

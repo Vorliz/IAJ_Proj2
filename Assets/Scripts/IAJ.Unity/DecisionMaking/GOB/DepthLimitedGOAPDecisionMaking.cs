@@ -3,6 +3,7 @@ using UnityEngine;
 using Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions;
 using Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel;
 using Assets.Scripts.Game;
+using Assets.Scripts.Game.NPCs;
 
 namespace Assets.Scripts.IAJ.Unity.DecisionMaking.GOB
 {
@@ -104,6 +105,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.GOB
                 {
                     var child = currentModel.GenerateChildWorldModel();
                     nextAction.ApplyActionEffects(child);
+                    if (child.Character.ReactToEnemy) ApplyEnemyThreat(currentModel, child, nextAction);
                     child.Character.UpdateGoalsInsistence(child);
                     this.Models[this.CurrentDepth + 1] = child;
                     this.LevelAction[this.CurrentDepth] = nextAction;
@@ -120,6 +122,54 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.GOB
             this.InProgress = false;
             return this.BestAction;
 
+        }
+
+        // Bonus (ReactToEnemy): predict that walking past an awake enemy costs HP.
+        // Every enemy still alive in the model whose distance to the path (from -> to) is within the detection radius
+        // attacks the hero once, so the Survive goal goes up and GOAP prefers safer sequences (potions, shield, other routes).
+        private void ApplyEnemyThreat(WorldModel from, WorldModel to, Action action)
+        {
+            if (GameManager.Instance.monsterControl == GameManager.MonsterControl.SleepingMonsters) return;
+
+            var start = (Vector3)from.GetProperty(PropertiesName.POSITION);
+            var end = (Vector3)to.GetProperty(PropertiesName.POSITION);
+            // the target of a sword attack is already accounted for by the attack itself
+            var target = (action as WalkToTargetAndExecuteAction)?.Target;
+
+            int hp = (int)to.GetProperty(PropertiesName.HP);
+            int shieldHp = (int)to.GetProperty(PropertiesName.ShieldHP);
+            bool attacked = false;
+
+            foreach (var enemy in GameManager.Instance.enemies)
+            {
+                if (enemy == null || enemy == target || !(bool)to.GetProperty(enemy.name)) continue;
+                if (DistanceToSegmentXZ(enemy.transform.position, start, end) > AutonomousCharacter.ENEMY_DETECTION_RADIUS) continue;
+
+                int damage = enemy.GetComponent<Monster>().stats.SimpleDamage;
+                // the shield absorbs damage first, like in SwordAttack.ApplyActionEffects
+                int absorbed = Mathf.Min(shieldHp, damage);
+                shieldHp -= absorbed;
+                hp -= damage - absorbed;
+                attacked = true;
+            }
+
+            if (attacked)
+            {
+                to.SetProperty(PropertiesName.HP, hp);
+                to.SetProperty(PropertiesName.ShieldHP, shieldHp);
+            }
+        }
+
+        private static float DistanceToSegmentXZ(Vector3 point, Vector3 a, Vector3 b)
+        {
+            var p = new Vector2(point.x, point.z);
+            var segStart = new Vector2(a.x, a.z);
+            var segment = new Vector2(b.x, b.z) - segStart;
+            float lengthSqr = segment.sqrMagnitude;
+            if (lengthSqr < 0.0001f) return Vector2.Distance(p, segStart);
+
+            float t = Mathf.Clamp01(Vector2.Dot(p - segStart, segment) / lengthSqr);
+            return Vector2.Distance(p, segStart + t * segment);
         }
     }
 }
