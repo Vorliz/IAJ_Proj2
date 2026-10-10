@@ -57,10 +57,17 @@ public class AutonomousCharacter : NPC
         MCTS_BiasedPlayout
     }
 
+    public enum MCTSWorldModelType
+    {
+        DictionaryWorldModel,
+        ArrayWorldModel
+    }
+
     [Header("Character Behaviour Algorithm")]
     [Tooltip("Here you choose what algorithm control Sir Uthgard")]
     [SerializeField]
     public CharacterControlType characterControl;
+    public MCTSWorldModelType mctsWorldModelType;
 
     public bool ReactToEnemy;
     [Tooltip("Finding an enemy makes the character replan")]
@@ -114,7 +121,7 @@ public class AutonomousCharacter : NPC
     public GOBDecisionMaking GOBDecisionMaking { get; set; }
     public DepthLimitedGOAPDecisionMaking GOAPDecisionMaking { get; set; }
     public MCTS MCTSDecisionMaking { get; set; }
-    //public MCTSBiasedPlayout MCTSBiasedDecisionMaking { get; set; }
+    public MCTSBiasedPlayout MCTSBiasedDecisionMaking { get; set; }
     public Vector3 InitialPosition { get; set; }
 
     public GameObject nearEnemy { get; private set; }
@@ -168,6 +175,25 @@ public class AutonomousCharacter : NPC
         GOAPActive = (characterControl == CharacterControlType.GOAP);
         MCTSActive = (characterControl == CharacterControlType.MCTS);
         MCTSBiasedPlayoutActive = (characterControl == CharacterControlType.MCTS_BiasedPlayout);
+
+        bool showGoalDiscontentment = !MCTSActive && !MCTSBiasedPlayoutActive;
+        Text[] goalDiscontentmentTexts =
+        {
+            this.SurviveGoalText,
+            this.GainXPGoalText,
+            this.BeQuickGoalText,
+            this.GetRichGoalText,
+            this.DiscontentmentText
+        };
+        foreach (Text goalText in goalDiscontentmentTexts)
+        {
+            goalText.gameObject.SetActive(showGoalDiscontentment);
+            if (!showGoalDiscontentment)
+            {
+                Image background = goalText.GetComponentInParent<Image>();
+                if (background != null) background.enabled = false;
+            }
+        }
 
 
         //initialization of the GOB decision making
@@ -262,14 +288,18 @@ public class AutonomousCharacter : NPC
             }
             else if (this.MCTSActive)
             {
-                var worldModel = new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
+                WorldModel worldModel = this.mctsWorldModelType == MCTSWorldModelType.ArrayWorldModel
+                    ? new ArrayWorldModel(GameManager.Instance, this, this.Actions)
+                    : new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
                 this.MCTSDecisionMaking = new MCTS(worldModel, MCTS_MaxIterations, MCTS_MaxIterationsPerFrame, MCTS_NumberPlayouts, MCTS_MaxPlayoutDepth);
             }
-            /*else if (this.MCTSBiasedPlayoutActive)
+            else if (this.MCTSBiasedPlayoutActive)
             {
-                var worldModel = new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
+                WorldModel worldModel = this.mctsWorldModelType == MCTSWorldModelType.ArrayWorldModel
+                    ? new ArrayWorldModel(GameManager.Instance, this, this.Actions)
+                    : new DictionaryWorldModel(GameManager.Instance, this, this.Actions, this.Goals);
                 this.MCTSBiasedDecisionMaking = new MCTSBiasedPlayout(worldModel, MCTS_MaxIterations, MCTS_MaxIterationsPerFrame, MCTS_NumberPlayouts, MCTS_MaxPlayoutDepth);
-            } */
+            }
         }
 
         string intro = "My Diary \n I awoke. What a wonderful day to kill Monsters! \n";
@@ -334,10 +364,10 @@ public class AutonomousCharacter : NPC
             {
                 this.MCTSDecisionMaking.InitializeMCTSearch();
             }
-            /*else if (MCTSBiasedPlayoutActive)
+            else if (MCTSBiasedPlayoutActive)
             {
                 this.MCTSBiasedDecisionMaking.InitializeMCTSearch();
-            }*/
+            }
         }
 
         if (this.ControlledByPlayer)
@@ -383,10 +413,10 @@ public class AutonomousCharacter : NPC
         {
             this.UpdateMCTS(this.MCTSDecisionMaking);
         }
-        /*else if (this.MCTSBiasedPlayoutActive)
+        else if (this.MCTSBiasedPlayoutActive)
         {
             this.UpdateMCTS(this.MCTSBiasedDecisionMaking);
-        }*/
+        }
 
         if (this.CurrentAction != null)
         {

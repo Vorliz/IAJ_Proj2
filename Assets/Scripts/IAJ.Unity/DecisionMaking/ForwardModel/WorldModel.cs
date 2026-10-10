@@ -30,6 +30,8 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
 
         public abstract float GetScore();
 
+        public abstract float GetFinalScore();
+
         public abstract bool IsTerminal();
 
         public abstract bool IsWinningState();

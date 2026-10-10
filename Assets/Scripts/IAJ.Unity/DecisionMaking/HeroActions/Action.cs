@@ -60,10 +60,12 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.HeroActions
         }
 
         // Used for MCTS Biased
-  
         public virtual float GetHValue(WorldModel worldModel)
         {
-            return 0.0f;
+            float currentScore = worldModel.GetScore();
+            WorldModel nextState = worldModel.GenerateChildWorldModel();
+            this.ApplyActionEffects(nextState);
+            return nextState.GetScore() - currentScore;
         }
     }
 }

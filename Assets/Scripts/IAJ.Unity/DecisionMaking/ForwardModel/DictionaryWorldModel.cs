@@ -13,7 +13,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
         private Dictionary<string, object> Properties { get; set; }
         private List<Goal> Goals { get; set; }
         protected DictionaryWorldModel Parent { get; set; }
- 
+
         //This constructor is called to create the first world model,
         //that corresponds to the character's perceptions of the current "real world"
         public DictionaryWorldModel(GameManager gameManager, AutonomousCharacter character,  List<Action> actions, List<Goal> goals)
@@ -66,7 +66,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
             }
         }
 
- 
+
         public override object GetProperty(string propertyName)
         {
             //recursive implementation of WorldModel
@@ -97,7 +97,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
                     PropertiesName.PreviousLEVEL => this.GameManager.Character.baseStats.Level,
                     PropertiesName.PreviousMONEY => this.GameManager.Character.baseStats.Money,
                     _ => this.GameManager.disposableObjects.ContainsKey(propertyName),
-                    // If an object name is found in the dictionary of disposable objects, 
+                    // If an object name is found in the dictionary of disposable objects,
                     // then the object still exists. The object has been removed/destroyed otherwise.
                 };
             }
@@ -133,8 +133,8 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
             this.GoalValues[goalName] = value;
         }
 
- 
-     
+
+
         public override bool IsTerminal()
         {
             return this.IsWinningState() || this.IsLosingState();
@@ -155,10 +155,12 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
             return HP <= 0 || time >= GameManager.GameConstants.TIME_LIMIT;
         }
 
-        public override float GetScore()
+        public override float GetFinalScore()
         {
             int money = (int)this.GetProperty(PropertiesName.MONEY);
             int HP = (int)this.GetProperty(PropertiesName.HP);
+            int ShieldHP = (int)this.GetProperty(PropertiesName.ShieldHP);
+            int lvl = (int)this.GetProperty(PropertiesName.LEVEL);
             float time = (float)this.GetProperty(PropertiesName.TIME);
 
             if (HP <= 0 || time >= GameManager.GameConstants.TIME_LIMIT) //lose
@@ -168,11 +170,46 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
             else
             { // non-terminal state
                 return 0.0f;
-                //you can change this to return a heuristic on the state
-                //e.g. return timeAndMoneyScore(time, money) * levelScore() * hpScore(HP) * timeScore(time);
             }
         }
 
+        public override float GetScore()
+        {
+            int money = (int)this.GetProperty(PropertiesName.MONEY);
+            int HP = (int)this.GetProperty(PropertiesName.HP);
+            int ShieldHP = (int)this.GetProperty(PropertiesName.ShieldHP);
+            int lvl = (int)this.GetProperty(PropertiesName.LEVEL);
+            float time = (float)this.GetProperty(PropertiesName.TIME);
+
+            if (HP <= 0 || time >= GameManager.GameConstants.TIME_LIMIT) //lose
+                return 0.0f;
+            else if (this.NextPlayer == 0 && money == 25 && HP > 0) //win
+                return 1.0f;
+            else
+            { // non-terminal state
+                return timeAndMoneyScore(time, money) + levelScore(lvl) + hpScore(HP + ShieldHP) + timeScore(time);
+            }
+        }
+
+        private float timeAndMoneyScore(float time, int money)
+        {
+            return 0.01f * (money / time);
+        }
+
+        private float levelScore(int lvl)
+        {
+            return 0.03f * lvl;
+        }
+
+        private float hpScore(int HP)
+        {
+            return 0.11f * HP;
+        }
+
+        private float timeScore(float time)
+        {
+            return -0.01f * (time - GameManager.GameConstants.TIME_LIMIT);
+        }
 
         /*public virtual int GetNextPlayer()
         {
