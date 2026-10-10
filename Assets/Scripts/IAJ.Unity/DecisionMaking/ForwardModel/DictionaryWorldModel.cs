@@ -177,8 +177,6 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
         {
             int money = (int)this.GetProperty(PropertiesName.MONEY);
             int HP = (int)this.GetProperty(PropertiesName.HP);
-            int ShieldHP = (int)this.GetProperty(PropertiesName.ShieldHP);
-            int lvl = (int)this.GetProperty(PropertiesName.LEVEL);
             float time = (float)this.GetProperty(PropertiesName.TIME);
 
             if (HP <= 0 || time >= GameManager.GameConstants.TIME_LIMIT) //lose
@@ -187,28 +185,8 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
                 return 1.0f;
             else
             { // non-terminal state
-                return timeAndMoneyScore(time, money) + levelScore(lvl) + hpScore(HP + ShieldHP) + timeScore(time);
+                return this.NonTerminalHeuristicScore();
             }
-        }
-
-        private float timeAndMoneyScore(float time, int money)
-        {
-            return 0.01f * (money / time);
-        }
-
-        private float levelScore(int lvl)
-        {
-            return 0.03f * lvl;
-        }
-
-        private float hpScore(int HP)
-        {
-            return 0.11f * HP;
-        }
-
-        private float timeScore(float time)
-        {
-            return -0.01f * (time - GameManager.GameConstants.TIME_LIMIT);
         }
 
         /*public virtual int GetNextPlayer()

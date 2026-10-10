@@ -24,38 +24,57 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
         {
             WorldModel currentState = initialStateForPlayout;
             int playoutDepth = 0;
-            while (!currentState.IsTerminal() || playoutDepth <= PlayoutDepthLimit)
+            while (!currentState.IsTerminal() && playoutDepth < PlayoutDepthLimit)
             {
                 var availableActions = currentState.GetExecutableActions();
-                if (availableActions == null || availableActions.Count() == 0)
+                if (availableActions == null || availableActions.Length == 0)
                 {
                     break;
                 }
                 playoutDepth++;
                 var nextState = currentState.GenerateChildWorldModel();
-                GetBestAction(currentState, availableActions).ApplyActionEffects(nextState);
+                ChooseBiasedAction(currentState, availableActions).ApplyActionEffects(nextState);
+                nextState.CalculateNextPlayer();
                 currentState = nextState;
-                //currentState.CalculateNextPlayer();
             }
 
             MaxPlayoutDepthReached = Math.Max(MaxPlayoutDepthReached, playoutDepth);
+            // when the playout is cut by the depth limit, the heuristic estimates the quality of the state
             return currentState.GetScore();
         }
 
-        private Action GetBestAction(WorldModel currentState, Action[] actions)
+        // Softmax (roulette) over the actions' heuristic values: better actions are more likely,
+        // but the choice stays random so that several playouts explore different sequences
+        private const float Temperature = 0.05f;
+
+        private Action ChooseBiasedAction(WorldModel currentState, Action[] actions)
         {
-            Action bestAction = null;
-            float bestActionScore = float.NegativeInfinity;
-            foreach (Action action in actions)
+            if (actions.Length == 1) return actions[0];
+
+            var hValues = new float[actions.Length];
+            float maxH = float.NegativeInfinity;
+            for (int i = 0; i < actions.Length; i++)
             {
-                float actionScore = action.GetHValue(currentState);
-                if (actionScore > bestActionScore)
-                {
-                    bestAction = action;
-                    bestActionScore = actionScore;
-                }
+                hValues[i] = actions[i].GetHValue(currentState);
+                maxH = Math.Max(maxH, hValues[i]);
             }
-            return bestAction;
+
+            // subtracting maxH keeps Exp from overflowing
+            var weights = new double[actions.Length];
+            double totalWeight = 0.0;
+            for (int i = 0; i < actions.Length; i++)
+            {
+                weights[i] = Math.Exp((hValues[i] - maxH) / Temperature);
+                totalWeight += weights[i];
+            }
+
+            double roll = this.RandomGenerator.NextDouble() * totalWeight;
+            for (int i = 0; i < actions.Length; i++)
+            {
+                roll -= weights[i];
+                if (roll <= 0.0) return actions[i];
+            }
+            return actions[actions.Length - 1];
         }
     }
 }

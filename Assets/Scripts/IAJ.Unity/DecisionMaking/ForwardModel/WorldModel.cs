@@ -103,6 +103,28 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
             return action;
         }
 
+        // Heuristic value of a non-terminal state, used by the biased/limited playouts.
+        // Each factor is normalized to [0,1] and the total is scaled to [0, 0.9],
+        // so a non-terminal state is always worth less than a victory (1.0).
+        private const int MaxLevel = 4; // same cap as the LevelUp action
+
+        protected float NonTerminalHeuristicScore()
+        {
+            int money = (int)this.GetProperty(PropertiesName.MONEY);
+            int hp = (int)this.GetProperty(PropertiesName.HP);
+            int shieldHP = (int)this.GetProperty(PropertiesName.ShieldHP);
+            int maxHP = (int)this.GetProperty(PropertiesName.MAXHP);
+            int level = (int)this.GetProperty(PropertiesName.LEVEL);
+            float time = (float)this.GetProperty(PropertiesName.TIME);
+
+            float moneyScore = Mathf.Clamp01(money / 25.0f);
+            float hpScore = Mathf.Clamp01((hp + shieldHP) / (float)Mathf.Max(1, maxHP));
+            float levelScore = Mathf.Clamp01((level - 1) / (float)(MaxLevel - 1));
+            float timeScore = Mathf.Clamp01(1.0f - time / GameManager.GameConstants.TIME_LIMIT);
+
+            return 0.9f * (0.5f * moneyScore + 0.3f * hpScore + 0.1f * levelScore + 0.1f * timeScore);
+        }
+
         public virtual Action[] GetExecutableActions()
         {
             if (this.NextPlayer == 0)
