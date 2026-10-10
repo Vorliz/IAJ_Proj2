@@ -11,7 +11,7 @@ namespace Assets.Scripts.IAJ.Unity.Formations
 
         public TriangleFormation()
         {
-            this.FreeAnchor = false;
+            this.FreeAnchor = true;
         }
 
         public override Vector3 GetOrientation(FormationManager formation )

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
@@ -78,6 +79,9 @@ public class GameManager : MonoBehaviour
     private float enemyAttackCooldown = 0.0f;
     public bool gameEnded { get; set; } = false;
     public Vector3 initialPosition { get; set; }
+
+    public NavMeshAgent formationAnchor;
+
 
     void Awake()
     {
@@ -220,6 +224,11 @@ public class GameManager : MonoBehaviour
                     formation.BreakFormation();
                 } else
                 {
+                    if (this.formationAnchor != null)
+                    {
+                        formation.AnchorPosition = this.formationAnchor.transform.position;
+                        formation.Orientation = this.formationAnchor.transform.forward;
+                    }
                     formation.UpdateSlots();
                 }
             }

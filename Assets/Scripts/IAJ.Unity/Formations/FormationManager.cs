@@ -36,12 +36,8 @@ namespace Assets.Scripts.IAJ.Unity.Formations
                 npc.FormationManager = this; 
                 SlotAssignment[npc] = i;
                 i++;
-                if (SlotAssignment[npc] == 0) {
-                    npc.formationLeader = true;
-                }
-                else {
-                    npc.formationLeader = false;
-                }
+                // with a free anchor (ghost leader) no orc is the leader
+                npc.formationLeader = !pattern.FreeAnchor && SlotAssignment[npc] == 0;
             }
             // the pattern may define specific rules for the orientation...
             //this.Orientation = pattern.GetOrientation( this, orientation );
@@ -55,7 +51,7 @@ namespace Assets.Scripts.IAJ.Unity.Formations
                 SlotAssignment[npc] = i;
 
                 bool wasLeader = npc.formationLeader;
-                npc.formationLeader = (i == 0);
+                npc.formationLeader = !Pattern.FreeAnchor && i == 0;
                 if(npc.formationLeader && !wasLeader)
                 {
                     npc.SetFormationLeader();
@@ -103,7 +99,7 @@ namespace Assets.Scripts.IAJ.Unity.Formations
         {
             var anchor = Pattern.FreeAnchor ?  AnchorPosition : SlotAssignment.FirstOrDefault(pair => pair.Value == 0).Key.transform.position;
             AnchorPosition = anchor;
-            Orientation = Pattern.FreeAnchor ?  AnchorPosition : SlotAssignment.FirstOrDefault(pair => pair.Value == 0).Key.transform.forward;
+            Orientation = Pattern.FreeAnchor ?  Orientation : SlotAssignment.FirstOrDefault(pair => pair.Value == 0).Key.transform.forward;
 
 
             var orientationMatrix = Orientation;
