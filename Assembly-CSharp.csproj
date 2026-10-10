@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Game\Monsters\Orc.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\UtilsClass.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\Inverter.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\GOB\DepthLimitedGOAPDecisionMaking.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\BehaviourTrees\PatrolTree.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\GOB\GOBDecisionMaking.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\Pursue.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\LightAttack.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\MCTS\MCTSNode.cs" />
+    <Compile Include="Assets\Scripts\IAJ.Unity\Formations\TriangleFormation.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\Sequence.cs" />
     <Compile Include="Assets\Scripts\Game\Properties.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\HeroActions\PickUpChest.cs" />
@@ -117,7 +119,6 @@
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\IsCharacterNearTarget.cs" />
     <Compile Include="Assets\External\CodeMonkey\MonoBehaviours\CameraFollow.cs" />
     <Compile Include="Assets\External\CodeMonkey\Utils\World_Bar.cs" />
-    <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\MoveToInterruptible.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\ForwardModel\WorldModel.cs" />
     <Compile Include="Assets\Scripts\IAJ.Unity\DecisionMaking\BehaviorTree\EnemyTasks\OrcTasks\HeardShout.cs" />
     <Compile Include="Assets\Scripts\AutonomousCharacter.cs" />
@@ -1369,10 +1370,6 @@
       <HintPath>Library\ScriptAssemblies\Unity.AI.Navigation.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEditor.Purchasing">
-      <HintPath>Library\ScriptAssemblies\UnityEditor.Purchasing.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.AI.Assistant.Agent.Dynamic.Extension.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.AI.Assistant.Agent.Dynamic.Extension.Editor.dll</HintPath>
       <Private>False</Private>
@@ -1403,10 +1400,6 @@
     </Reference>
     <Reference Include="Unity.AI.Assistant.Integrations.Profiler.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.AI.Assistant.Integrations.Profiler.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.Purchasing.Codeless">
-      <HintPath>Library\ScriptAssemblies\UnityEngine.Purchasing.Codeless.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.AI.Assistant.Tools.Editor">
@@ -1455,10 +1448,6 @@
     </Reference>
     <Reference Include="Unity.AI.Navigation.Editor.ConversionSystem">
       <HintPath>Library\ScriptAssemblies\Unity.AI.Navigation.Editor.ConversionSystem.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.Purchasing.SecurityCore">
-      <HintPath>Library\ScriptAssemblies\UnityEngine.Purchasing.SecurityCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.InferenceEngine.Editor">
@@ -1513,20 +1502,12 @@
       <HintPath>Library\ScriptAssemblies\Unity.2D.Tilemap.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.Purchasing.SecurityStub">
-      <HintPath>Library\ScriptAssemblies\UnityEngine.Purchasing.SecurityStub.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.Collections.Tests.CoreCLR.ProtectedJobNested">
       <HintPath>Library\ScriptAssemblies\Unity.Collections.Tests.CoreCLR.ProtectedJobNested.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Collections">
       <HintPath>Library\ScriptAssemblies\Unity.Collections.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.Purchasing.Stores">
-      <HintPath>Library\ScriptAssemblies\UnityEngine.Purchasing.Stores.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.XR.LegacyInputHelpers">
@@ -1545,10 +1526,6 @@
       <HintPath>Library\ScriptAssemblies\Unity.Mathematics.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Purchasing.Common">
-      <HintPath>Library\ScriptAssemblies\Purchasing.Common.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.Multiplayer.Center.Common">
       <HintPath>Library\ScriptAssemblies\Unity.Multiplayer.Center.Common.dll</HintPath>
       <Private>False</Private>
@@ -1557,12 +1534,12 @@
       <HintPath>Library\ScriptAssemblies\Unity.Services.Core.Environments.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.Purchasing">
-      <HintPath>Library\ScriptAssemblies\UnityEngine.Purchasing.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.Burst">
       <HintPath>Library\ScriptAssemblies\Unity.Burst.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="HFDownloader">
@@ -1595,10 +1572,6 @@
     </Reference>
     <Reference Include="Unity.Collections.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.Collections.Editor.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.InferenceEngine.iOSBLAS">

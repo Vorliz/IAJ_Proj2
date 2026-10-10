@@ -9,5 +9,6 @@ Notes/
 .vscode/*
 *.sln
 *.slnx
+!Assets/Scripts/IAJ.Unity/DecisionMaking/BehaviorTree/Inverter.cs.meta
 # Unity crash recovery scenes
 [Aa]ssets/_Recovery/

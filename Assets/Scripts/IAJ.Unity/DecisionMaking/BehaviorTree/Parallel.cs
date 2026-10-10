@@ -10,9 +10,8 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree
 
         public Parallel() { }
 
-        // A Parallel will return immediately with a success status code when one of its children
-        // runs fails. As long as its children are Succeding, it will keep on retrying. If it runs out of
-        // children completely, it will return a failure status code
+        // A Parallel returns failure when one of its children fails. While children succeed,
+        // it keeps retrying them and remains running.
         public override Result Run()
         {
             if (children == null || children.Count == 0)
@@ -29,7 +28,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.BehaviorTree
                 if (result == Result.Failure)
                 {
                     Reset();
-                    return Result.Success;
+                    return Result.Failure;
                 }
 
                 child.Reset();
