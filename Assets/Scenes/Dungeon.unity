@@ -49787,7 +49787,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 680756253, guid: 02c6f6ee2c3087944bf0149b3a48d76f, type: 3}
       propertyPath: GOAP_MaxDepth
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 680756253, guid: 02c6f6ee2c3087944bf0149b3a48d76f, type: 3}
       propertyPath: GetManaPotion
@@ -49823,7 +49823,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 680756253, guid: 02c6f6ee2c3087944bf0149b3a48d76f, type: 3}
       propertyPath: characterControl
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 680756253, guid: 02c6f6ee2c3087944bf0149b3a48d76f, type: 3}
       propertyPath: BeQuickGoalWeight
