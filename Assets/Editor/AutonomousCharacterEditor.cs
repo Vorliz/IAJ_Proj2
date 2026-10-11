@@ -56,9 +56,11 @@ public class AutonomousCharacterEditor : Editor
 
         }
         else if (character.characterControl == AutonomousCharacter.CharacterControlType.MCTS ||
-            character.characterControl == AutonomousCharacter.CharacterControlType.MCTS_BiasedPlayout)
+            character.characterControl == AutonomousCharacter.CharacterControlType.MCTS_BiasedPlayout ||
+            character.characterControl == AutonomousCharacter.CharacterControlType.MCTS_LimitedBiasedPlayout)
         {
             EditorGUILayout.Space(); 
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("mctsWorldModelType"), new GUIContent("World Model"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("MCTS_MaxIterations"), new GUIContent("Max Iterations"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("MCTS_MaxIterationsPerFrame"), new GUIContent("Max Iterations per Frame"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("MCTS_MaxPlayoutDepth"), new GUIContent("Max Playout Depth"));

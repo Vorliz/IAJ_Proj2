@@ -122,7 +122,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.ForwardModel
             float levelScore = Mathf.Clamp01((level - 1) / (float)(MaxLevel - 1));
             float timeScore = Mathf.Clamp01(1.0f - time / GameManager.GameConstants.TIME_LIMIT);
 
-            return 0.9f * (0.5f * moneyScore + 0.3f * hpScore + 0.1f * levelScore + 0.1f * timeScore);
+            return 0.9f * (0.4f * moneyScore + 0.2f * hpScore + 0.3f * levelScore + 0.1f * timeScore);
         }
 
         public virtual Action[] GetExecutableActions()
