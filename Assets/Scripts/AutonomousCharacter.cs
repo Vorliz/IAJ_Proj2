@@ -685,6 +685,7 @@ public class AutonomousCharacter : NPC
 
     // MCTS statistics (MCTS, Biased and Limited), accumulated after each completed decision
     private int mctsDecisionFrames;
+    private int mctsLastSearchFrame = -1;
     private int mctsDecisionCount;
     private long mctsTotalIterations;
     private int mctsMinIterations = int.MaxValue;
@@ -925,8 +926,10 @@ public class AutonomousCharacter : NPC
 
     private void UpdateMCTS(MCTS mCTS)
     {
-        if (mCTS.InProgress)
+        if (mCTS.InProgress && this.mctsLastSearchFrame != Time.frameCount)
         {
+            this.mctsLastSearchFrame = Time.frameCount;
+            mCTS.MaxIterationsPerFrame = Mathf.Max(1, MCTS_MaxIterationsPerFrame);
             var action = mCTS.ChooseAction();
             this.mctsDecisionFrames++;
             // the search just finished in this frame

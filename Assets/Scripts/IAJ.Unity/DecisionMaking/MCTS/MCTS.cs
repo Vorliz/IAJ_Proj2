@@ -16,7 +16,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
         public const float C = 1.4f;
         public bool InProgress { get; private set; }
         protected int MaxIterations { get; set; }
-        protected int MaxIterationsPerFrame { get; set; }
+        public int MaxIterationsPerFrame { get; set; }
         protected int NumberPlayouts { get; set; }
         protected int PlayoutDepthLimit { get; set; }
         public MCTSNode BestFirstChild { get; set; }
@@ -96,7 +96,7 @@ namespace Assets.Scripts.IAJ.Unity.DecisionMaking.MCTS
             }
 
             this.TotalProcessingTime += Time.realtimeSinceStartup - processingTime;
-            if (this.FrameCurrentIterations >= this.MaxIterationsPerFrame)
+            if (this.CurrentIterations < this.MaxIterations && this.FrameCurrentIterations >= this.MaxIterationsPerFrame)
             {
                 return null;
             }
